@@ -34,6 +34,7 @@
     --rule: #dcdcdc;
     --panel: #f4f4f4;
     --link: #111111;
+    --dot: #c9c9c9;
     color-scheme: light;
 }
 
@@ -46,6 +47,7 @@
         --rule: #333333;
         --panel: #1c1c1c;
         --link: #ececec;
+        --dot: #3d3d3d;
         color-scheme: dark;
     }
 }
@@ -57,6 +59,7 @@
     --rule: #333333;
     --panel: #1c1c1c;
     --link: #ececec;
+    --dot: #3d3d3d;
     color-scheme: dark;
 }
 
@@ -182,11 +185,16 @@ button:focus-visible {
 /* ---------- Introduction ---------- */
 
 .intro {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: grid;
     grid-template-columns: minmax(0, 1fr) clamp(10rem, 21vw, 14.5rem);
     column-gap: clamp(1.5rem, 5vw, 4.5rem);
     align-items: start;
-    padding-block: clamp(1.25rem, 4vw, 2.75rem) clamp(2rem, 5vw, 3.25rem);
+    /* Room inside the clipped box for the focus ring of the links. */
+    margin-inline: -0.5rem;
+    padding: clamp(1.25rem, 4vw, 2.75rem) 0.5rem clamp(2rem, 5vw, 3.25rem);
 }
 
 .intro h1 {
@@ -311,6 +319,37 @@ button:focus-visible {
     font-size: 0.875rem;
 }
 
+/* ---------- Parallax in the introduction ---------- */
+
+/* A field of dots behind the introduction. It scrolls more slowly than the
+   page, and the portrait drifts inside its frame; --sy is the scroll
+   position in pixels, set by assets/js/site.js. */
+.backdrop {
+    position: absolute;
+    z-index: -1;
+    top: -2rem;
+    right: 0;
+    width: min(46rem, 100%);
+    height: calc(100% + 16rem);
+    pointer-events: none;
+    background-image: radial-gradient(circle, var(--dot) 1.1px, transparent 1.7px);
+    background-size: 1.375rem 1.375rem;
+    -webkit-mask-image: radial-gradient(ellipse 62% 48% at 72% 34%, #000 18%, transparent 78%);
+    mask-image: radial-gradient(ellipse 62% 48% at 72% 34%, #000 18%, transparent 78%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .backdrop {
+        transform: translate3d(0, calc(var(--sy, 0) * 0.42px), 0);
+        will-change: transform;
+    }
+
+    .portrait img {
+        transform: translate3d(0, calc(-8% + min(var(--sy, 0) * 0.09px, 16%)), 0) scale(1.2);
+        will-change: transform;
+    }
+}
+
 /* ---------- Narrow screens ---------- */
 
 @media (max-width: 54rem) {
@@ -322,6 +361,12 @@ button:focus-visible {
     .bar-links { flex: 1; justify-content: flex-start; gap: 0.2rem 1rem; margin-left: 0; }
     .bar .home + .bar-links { padding-top: 0.15rem; }
     .toggle { flex: none; margin-top: -0.35rem; }
+
+    /* The dots stay around the name and the portrait, off the text. */
+    .backdrop {
+        -webkit-mask-image: radial-gradient(ellipse 75% 26% at 70% 16%, #000 20%, transparent 80%);
+        mask-image: radial-gradient(ellipse 75% 26% at 70% 16%, #000 20%, transparent 80%);
+    }
 
     .intro { grid-template-columns: minmax(0, 1fr) 6.5rem; column-gap: 1rem; }
     .intro-text { display: contents; }
@@ -349,8 +394,9 @@ button:focus-visible {
     }
 
     body { font-size: 10pt; }
-    .skip, .bar { display: none; }
+    .skip, .bar, .backdrop { display: none; }
     .wrap { max-width: none; padding: 0; }
-    .intro { padding-top: 0; grid-template-columns: minmax(0, 1fr) 8rem; }
+    .intro { margin: 0; padding: 0 0 1.5rem; grid-template-columns: minmax(0, 1fr) 8rem; }
+    .portrait img { transform: none; }
     .section { padding-block: 0.9rem; break-inside: avoid; }
 }

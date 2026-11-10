@@ -1,5 +1,5 @@
-// Light and dark mode, and the date of the last update. Each part does
-// nothing where its element is absent.
+// Light and dark mode, the parallax of the introduction, and the date of
+// the last update. Every part does nothing where its element is absent.
 (function () {
   'use strict';
 
@@ -33,6 +33,27 @@
   }
   if (system.addEventListener) system.addEventListener('change', show);
   show();
+
+  // ----- Parallax -----
+  // The styles move the dots and the portrait from --sy, the scroll position
+  // in pixels. Nothing moves for a visitor who asked for reduced motion.
+  var intro = document.querySelector('.intro');
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var queued = false;
+
+  function move() {
+    queued = false;
+    intro.style.setProperty('--sy', String(Math.min(window.scrollY, 1500)));
+  }
+
+  if (intro) {
+    window.addEventListener('scroll', function () {
+      if (queued || still.matches) return;
+      queued = true;
+      window.requestAnimationFrame(move);
+    }, { passive: true });
+    if (!still.matches) move();
+  }
 
   // ----- Date of the last push to the repository of this site -----
   var line = document.getElementById('updated');
