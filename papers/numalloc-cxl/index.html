@@ -61,6 +61,7 @@
     <ul class="links">
       <li><a href="bekkar-numalloc-cxl-2026.pdf">PDF</a></li>
       <li><a href="bekkar-numalloc-cxl-2026.tex">LaTeX source</a></li>
+      <li><a href="https://github.com/Zeleph25/cxl-alloc-benchmarks">Scripts and results</a></li>
     </ul>
   </header>
 
@@ -85,7 +86,7 @@
     <main class="prose" id="paper">
 <h2 id="s1">1. Project overview</h2>
 <h3 id="description">Description</h3>
-<p>This project evaluates NUMAlloc, a NUMA-aware memory allocator presented at ISMM ’23 <a href="#ref-1">[1]</a>, on a CXL-enabled server of the lab (4 NUMA nodes: 2 CPU nodes with local DDR memory, plus 2 CXL memory nodes with no CPUs). The goals are, first, to replicate the paper’s core performance comparison (its “Figure 4: runtime, remote accesses, and TLB misses across six memory allocators”), and second, to assess whether NUMAlloc’s binding-based design generalizes to CXL memory, which the original paper did not test.</p>
+<p>This project evaluates NUMAlloc, a NUMA-aware memory allocator presented at ISMM ’23 <a href="#ref-1">[1]</a>, on a CXL-enabled server of the lab (4 NUMA nodes: 2 CPU nodes with local DDR memory, plus 2 CXL memory nodes with no CPUs). The goals are, first, to replicate the paper’s core performance comparison (its “Figure 4: runtime, remote accesses, and TLB misses across six memory allocators”), and second, to assess whether NUMAlloc’s binding-based design generalizes to CXL memory, which the original paper did not test. The scripts, the source-code fixes and the raw results are public <a href="#ref-4">[4]</a>.</p>
 <h3 id="numalloc-s-main-objective">NUMAlloc’s main objective</h3>
 <p>NUMA machines split memory across multiple nodes, each attached to a specific set of CPU cores. A thread can access memory on its own node quickly (a “local” access), but accessing memory that lives on a different node is significantly slower (a “remote” access); our own locality test on this machine measured a 23–28% bandwidth penalty for this. Left to its own devices, a regular allocator has no awareness of this at all: it might hand a thread memory that happens to sit on a different node, or a thread might get migrated by the OS scheduler to a different node than where its memory actually lives. Both silently turn what should be fast local accesses into slow remote ones.</p>
 <p>NUMAlloc’s core idea is to fix this at the allocator level: it explicitly binds each thread to a specific NUMA node, and explicitly binds each region of memory to a specific node too, so it always knows exactly which node a thread is on and always gives that thread memory from its own node. This is what the paper calls <em>binding-based memory management</em>, the first of its kind, since prior NUMA-aware allocators (e.g., TCMalloc-NUMA) only bind memory, not threads, so a thread migrated by the OS scheduler can end up far from its own memory without the allocator ever knowing.</p>
@@ -107,11 +108,25 @@
 <p><strong>Note.</strong> LAMMPS and Quicksilver, the two MPI-based applications used to show this bug, are not part of the final Figure 4 comparison below. Getting even a single clean run required stacking three separate compatibility shims on top of NUMAlloc (working around the <code>malloc_usable_size</code> bug, plus two further NUMA binding issues that only surfaced once the first was fixed), and even then it only worked reliably within a single NUMA node, not at the full multi-node scale these applications are meant to run at. Given how much extra work this required for a comparison that would still be compromised, I did not pursue it further during the internship.</p>
 <h2 id="s3">3. NUMA and CXL locality effects are real on this hardware</h2>
 <p>Before drawing conclusions about allocator behavior, I built an allocator-independent test to confirm that memory locality actually matters on this specific machine. A single-threaded, memory-bandwidth-bound benchmark was run three times, changing nothing except where the OS was told to physically place its memory: on the local CPU node, on the other (remote) CPU node, or on a CXL memory node.</p>
-<p>This benchmark uses a sequential access pattern: each thread walks a large buffer from start to end, reading and rewriting every element, repeated over several passes (the same way as the classic STREAM benchmark). “Effective bandwidth” is the resulting throughput: total bytes moved (counting both the read and the write of each element) divided by elapsed time, combined across all threads. This deliberately isolates raw memory bandwidth rather than testing allocation/deallocation behavior. Unlike the Hoard suite or PARSEC benchmarks, which stress the allocator itself, this test measures the hardware’s actual memory bandwidth under different placement conditions, with the allocator playing no role at all. Local memory reached 14.9 GB/s and CXL memory 10.7 GB/s.</p>
+<p>This benchmark uses a sequential access pattern: each thread walks a large buffer from start to end, reading and rewriting every element, repeated over several passes (the same way as the classic STREAM benchmark). “Effective bandwidth” is the resulting throughput: total bytes moved (counting both the read and the write of each element) divided by elapsed time, combined across all threads. This deliberately isolates raw memory bandwidth rather than testing allocation/deallocation behavior. Unlike the Hoard suite or PARSEC benchmarks, which stress the allocator itself, this test measures the hardware’s actual memory bandwidth under different placement conditions, with the allocator playing no role at all.</p>
+<figure id="fig1">
+<img src="images/numa_locality.png" alt="">
+<figcaption><em>Figure 1.</em> Effective memory bandwidth for local, remote-CPU-node, and CXL placement (local: 14.9 GB/s; CXL: 10.7 GB/s).</figcaption>
+</figure>
 <h2 id="s4">4. Early baseline: the Hoard benchmark suite and pbzip2</h2>
 <p>Before building the full PARSEC-based Figure 4 replication, I first ran a quicker round of experiments using the Hoard synthetic benchmark suite, a small, fast set of allocator stress tests (larson, threadtest, cache-scratch, cache-thrash), alongside Pbzip2, to get an initial sense of how NUMAlloc compares to other allocators before committing to the larger PARSEC-based comparison.</p>
 <p>Pbzip2 compression showed no meaningful runtime difference between any of the six allocators: all finish within 0.01 seconds of each other. NUMAlloc’s peak memory usage on Pbzip2 is notably lower than every competitor (74 MB vs. 267–465 MB), though I am treating that specific number cautiously rather than as a confirmed result.</p>
+<figure id="fig2" class="fig-grid fig-grid-2">
+<img src="images/pbzip2_comparison_performance_default.png" alt="">
+<img src="images/pbzip2_comparison_memory_default.png" alt="">
+<figcaption><em>Figure 2.</em> Pbzip2 baseline across the six allocators.</figcaption>
+</figure>
 <p>cache-scratch and cache-thrash show no meaningful difference between any allocator at any thread count. larson (a throughput test) shows NUMAlloc as the slowest of all six allocators at every thread count tested, consistent with the paper’s own admission that it underperforms on this specific benchmark.</p>
+<figure id="fig3" class="fig-grid fig-grid-2">
+<img src="images/allocator_comparison_performance_default.png" alt="">
+<img src="images/allocator_comparison_memory_default.png" alt="">
+<figcaption><em>Figure 3.</em> Hoard benchmark suite results across thread counts.</figcaption>
+</figure>
 <p>The table below breaks this down further, showing each benchmark’s actual working set, what specifically it stresses in an allocator, and the measured allocation/deallocation throughput at 96 threads.</p>
 <div class="table-wrap" tabindex="0" role="group" aria-label="Table">
 <table class="wide">
@@ -171,7 +186,16 @@
 <li><strong>pbzip2:</strong> same pattern: NUMAlloc wins on the combined metric via its TLB advantage, even though it is not the single best on remote access alone.</li>
 <li><strong>fluidanimate:</strong> the one benchmark that still does not match the paper, and averaging made this more solidly confirmed, not less. NUMAlloc still has the worst remote-access count of all six allocators, and both jemalloc and mimalloc (not just mimalloc, as in the single-run result) clearly beat it on the combined metric too. This is the paper’s own headline example, and it remains an open, unresolved discrepancy after every correction I attempted.</li>
 </ul>
-<p>As a follow-up check, given AutoNUMA is a reactive mechanism that could interfere with NUMAlloc’s own static binding decisions, I re-ran the exact same comparison with AutoNUMA disabled. The rerun confirms what the numbers already showed: no allocator’s overall win or loss flips between the two conditions, but the remote-access gap for fluidanimate and pbzip2 specifically shifts noticeably between them, consistent with AutoNUMA’s migration overhead needing time to pay off, as discussed above.</p>
+<p>This is the main result, matching the paper’s stated system defaults (AutoNUMA enabled), shown as a histogram for direct comparison across all six allocators and three metrics.</p>
+<figure id="fig4">
+<img src="images/figure4_replication_autonuma_on.png" alt="">
+<figcaption><em>Figure 4.</em> Main result (AutoNUMA enabled, native inputs, no external numactl policy): runtime, remote accesses, and TLB misses for six allocators, averaged over 20 runs.</figcaption>
+</figure>
+<p>As a follow-up check, given AutoNUMA is a reactive mechanism that could interfere with NUMAlloc’s own static binding decisions, I re-ran the exact same comparison with AutoNUMA disabled. Visually, these confirm what the numbers already showed: no allocator’s overall win or loss flips between the two conditions, but the remote-access gap for fluidanimate and pbzip2 specifically shifts noticeably between the two figures, consistent with AutoNUMA’s migration overhead needing time to pay off, as discussed above.</p>
+<figure id="fig5">
+<img src="images/figure4_replication_autonuma_off.png" alt="">
+<figcaption><em>Figure 5.</em> Same comparison with AutoNUMA disabled (20 runs).</figcaption>
+</figure>
 <h2 id="s6">6. Threads pinned to one node, memory allowed from two</h2>
 <p>As a further test, I tried <code>numactl --cpunodebind=0 --membind=0,1</code>, pinning all threads to node 0’s CPUs while allowing memory to come from either node 0 or node 1. Unlike every prior policy tested (<code>--interleave=all</code> spreads across all nodes; <code>--membind=&lt;single node&gt;</code> forces everything onto one), this gives the OS a choice between two nodes while compute stays fixed, which is closer to the kind of decision a CXL-tiering allocator will actually need to make.</p>
 <p>Averaged over 5 runs, the results are genuinely mixed rather than a clean win. NUMAlloc has the worst remote-access count of all six allocators on every single benchmark under this policy, but still wins decisively on runtime for dedup (about 29% faster) and swaptions (about 34% faster), and modestly on pbzip2, via the same TLB-driven advantage seen elsewhere in this document. streamcluster is the clear exception: NUMAlloc loses on every metric simultaneously here, roughly twice as slow as every competitor, the one benchmark where its TLB advantage does not compensate.</p>
@@ -181,10 +205,24 @@
 <li><p>streamcluster changes from genuinely tied (main results) to a clear NUMAlloc loss here: the one benchmark where giving the OS a two-node choice for memory placement, rather than a single fixed node, seems to specifically hurt NUMAlloc.</p></li>
 </ol>
 <p>fluidanimate’s weakness (worst remote access of all six) was already present in the main results and simply persists here; it is not a new finding.</p>
+<figure id="fig6">
+<img src="images/figure4_cpu0mem01.png" alt="">
+<figcaption><em>Figure 6.</em> Results under <code>numactl --cpunodebind=0 --membind=0,1</code> (5 runs).</figcaption>
+</figure>
+<figure id="fig7" class="fig-grid fig-grid-3">
+<img src="images/figure4_cpu0mem01_runtime.png" alt="">
+<img src="images/figure4_cpu0mem01_remote.png" alt="">
+<img src="images/figure4_cpu0mem01_combined.png" alt="">
+<figcaption><em>Figure 7.</em> Additional plots for the <code>--cpunodebind=0 --membind=0,1</code> experiment.</figcaption>
+</figure>
 <h2 id="s7">7. Motivating the design: where current allocators fall short</h2>
 <p>Before starting the implementation, I wanted a concrete, motivational picture of where the current setup actually falls short on this CXL-enabled machine, rather than just reasoning about it, so I ran a few small experiments to show directly where NUMAlloc and default Linux behavior have real drawbacks.</p>
-<p><strong>Idea 1: memory scatter under default policy.</strong> Running a simple multi-threaded allocation (4 threads, 2 GB each, no explicit binding) and checking its actual per-node placement via <code>/proc/&lt;pid&gt;/numa_maps</code> showed the memory split almost evenly across both compute nodes: 3.3 GB on node 0, 4.9 GB on node 1, out of an 8 GB total request. One single contiguous buffer was physically torn across both nodes at once (one allocation showing 325,633 pages on node 0 and 198,656 on node 1). Neither CXL node received any of this allocation. This is a direct, concrete illustration of the exact problem NUMAlloc’s binding-based design exists to solve: with no explicit binding, memory placement is essentially arbitrary relative to which node a thread actually runs on.</p>
+<p><strong>Idea 1: memory scatter under default policy.</strong> Running a simple multi-threaded allocation (4 threads, 2 GB each, no explicit binding) and checking its actual per-node placement via <code>/proc/&lt;pid&gt;/numa_maps</code> showed the memory split almost evenly across both compute nodes: 3.3 GB on node 0, 4.9 GB on node 1, out of an 8 GB total request. One single contiguous buffer was physically torn across both nodes at once (one allocation showing 325,633 pages on node 0 and 198,656 on node 1). Neither CXL node received any of this allocation (<a href="#fig8">Figure 8</a>). This is a direct, concrete illustration of the exact problem NUMAlloc’s binding-based design exists to solve: with no explicit binding, memory placement is essentially arbitrary relative to which node a thread actually runs on.</p>
 <p><strong>Idea 2: NUMAlloc never actually sees the CXL nodes.</strong> Running NUMAlloc under the real 4-node topology, its own startup output reports “totally use 2 node”, correctly excluding the two CXL-only nodes. The reason is that <code>NUMA_NODES</code> is a hardcoded, compile-time constant in NUMAlloc’s Makefile (set to 2 for this project’s build), not something detected at runtime from the actual hardware. It happens to exclude the CXL nodes here only because that constant was manually set to match this machine’s compute-node count. This shows that NUMAlloc never sees CXL nodes, since its entire model of the machine’s topology is fixed at build time rather than discovered from real hardware. Detecting real topology at runtime, rather than assuming a fixed node count, will need to be one of the first things the CXL-aware allocator does differently.</p>
+<figure id="fig8">
+<img src="images/idea1_scatter.png" alt="">
+<figcaption><em>Figure 8.</em> Where a single 8 GB allocation landed under the default policy: 4 threads, no explicit binding.</figcaption>
+</figure>
 <p><strong>Idea 3: cost of data ending up on CXL.</strong> Testing genuine, natural memory overflow onto CXL would require pushing a node’s real free memory low enough to trigger the kernel’s own fallback behavior. On this shared machine, node 0 currently has only about 87 GB free, meaning forcing real overflow would mean consuming most of the currently available memory, which is not necessarily a good idea on a shared machine. The NUMA locality result earlier in this document already answers the same underlying question safely: local memory achieved 14.9 GB/s, while CXL memory achieved 10.7 GB/s under the same workload (<a href="#s3">Section 3</a>).</p>
 <h2 id="s8">8. Designing a CXL-aware allocator</h2>
 <p>Before implementing anything, it is worth laying out the plan and why, since the evidence gathered across this whole project already points toward some concrete design choices.</p>
@@ -209,6 +247,7 @@
 <li id="ref-1">H. Yang, X. Zhao, J. Zhou, W. Wang, S. Kundu, B. Wu, H. Guan and T. Liu. <a href="https://doi.org/10.1145/3591195.3595276">NUMAlloc: A Faster NUMA Memory Allocator</a>. ACM SIGPLAN International Symposium on Memory Management (ISMM), 2023.</li>
 <li id="ref-2">C. O'Donell. <a href="https://sourceware.org/pipermail/libc-announce/2021/000032.html">The GNU C Library version 2.34 is now available</a>. libc-announce, August 2021.</li>
 <li id="ref-3">M. Ünal, V. Gupta, Y. Pan, Y. Ren and S. Kashyap. <a href="https://doi.org/10.1145/3713082.3730376">Tolerate It if You Cannot Reduce It: Handling Latency in Tiered Memory</a>. Workshop on Hot Topics in Operating Systems (HotOS), 2025.</li>
+<li id="ref-4">A. Bekkar. <a href="https://github.com/Zeleph25/cxl-alloc-benchmarks">cxl-alloc-benchmarks: scripts, fixes and results of this evaluation</a>.</li>
 </ol>
 
     </main>
