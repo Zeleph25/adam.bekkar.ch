@@ -1,4 +1,4 @@
-/* Shared styles: fonts, colors, the page frame and the home page.
+/* Shared styles: fonts, colors, the site bar and the home page.
    The paper pages add assets/css/paper.css on top of this file. */
 
 @font-face {
@@ -9,21 +9,43 @@
     font-display: swap;
 }
 
-:root {
-    /* Taken from the portrait: the hoodie, the sky and the field. */
-    --ink: #1b2063;
-    --ink-soft: #4d5290;
-    --link: #4330d4;
-    --sky: #edf3fb;
-    --rule: #c5d3ec;
-    --meadow: #6a9c34;
-    --paper: #ffffff;
+@font-face {
+    font-family: "STIX Two Text";
+    src: url("../fonts/stix-two-text-latin-wght-normal.woff2") format("woff2");
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+}
 
+@font-face {
+    font-family: "STIX Two Text";
+    src: url("../fonts/stix-two-text-latin-wght-italic.woff2") format("woff2");
+    font-weight: 400 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* ---------- Colors ---------- */
+
+:root {
+    --paper: #ffffff;
+    --ink: #1b2063;
+    --muted: #4d5290;
+    --rule: #c5d3ec;
+    --panel: #edf3fb;
+    --link: #4330d4;
+    color-scheme: light;
+}
+
+/* ---------- Base ---------- */
+
+:root {
     --sans: "Schibsted Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --serif: "STIX Two Text", "Times New Roman", Times, serif;
 
     --gutter: clamp(1.25rem, 5vw, 3.5rem);
     --label: 11rem;
-    color-scheme: light;
+    --measure: 43rem;
 }
 
 *,
@@ -38,11 +60,10 @@ html {
 
 body {
     margin: 0;
-    background: var(--paper);
     color: var(--ink);
     font-family: var(--sans);
     font-size: 1.0625rem;
-    line-height: 1.55;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -55,14 +76,14 @@ img { display: block; max-width: 100%; height: auto; }
 a {
     color: var(--link);
     text-decoration-line: underline;
-    text-decoration-thickness: 0.07em;
+    text-decoration-thickness: 0.06em;
     text-underline-offset: 0.2em;
 }
 
-a:hover { color: var(--ink); text-decoration-thickness: 0.14em; }
+a:hover { text-decoration-thickness: 0.13em; }
 
 a:focus-visible {
-    outline: 3px solid var(--link);
+    outline: 3px solid var(--ink);
     outline-offset: 3px;
 }
 
@@ -85,312 +106,194 @@ a:focus-visible {
     padding-inline: var(--gutter);
 }
 
-/* ---------- Hero ---------- */
+/* ---------- Site bar ---------- */
 
-.hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) clamp(13rem, 30vw, 22rem);
-    column-gap: clamp(1.5rem, 5vw, 4.5rem);
-    align-items: end;
-    padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem);
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    padding-block: 1.1rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
 }
 
-.name {
-    /* The optical margin pulls the heavy A back onto the text edge. */
-    margin: 0 0 0.3em -0.045em;
-    font-size: clamp(4.25rem, 13.2vw, 10.75rem);
+.bar a { text-decoration: none; }
+.bar a:hover { text-decoration: underline; text-decoration-thickness: 0.13em; }
+
+.bar .home {
+    font-size: 1.125rem;
     font-weight: 800;
-    line-height: 0.86;
-    letter-spacing: -0.045em;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
 }
 
-.name span { display: block; }
-
-.role {
-    font-size: clamp(1.2rem, 2.1vw, 1.5rem);
-    font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-}
-
-.lede {
-    margin-top: 0.5rem;
-    max-width: 34em;
-    font-size: clamp(1.1rem, 1.7vw, 1.25rem);
-    line-height: 1.45;
-    color: var(--ink-soft);
-}
-
-.contact {
+.bar-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem 1.75rem;
-    margin-top: 1.6rem;
+    justify-content: flex-end;
+    gap: 0.2rem 1.5rem;
+    margin-left: auto;
+}
+
+/* ---------- Introduction ---------- */
+
+.intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(10rem, 21vw, 14.5rem);
+    column-gap: clamp(1.5rem, 5vw, 4.5rem);
+    align-items: start;
+    padding-block: clamp(1.25rem, 4vw, 2.75rem) clamp(2rem, 5vw, 3.25rem);
+}
+
+.intro h1 {
+    font-size: clamp(2.6rem, 7vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.role {
+    margin-top: 0.7rem;
+    font-size: clamp(1.0625rem, 1.9vw, 1.25rem);
     font-weight: 600;
+    line-height: 1.3;
+}
+
+.bio {
+    margin-top: 1.1rem;
+    max-width: 36rem;
+    font-family: var(--serif);
+    font-size: 1.1875rem;
+    line-height: 1.55;
+}
+
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.4rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.intro .links { margin-top: 1.3rem; font-size: 1rem; }
+
+.portrait {
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: var(--panel);
 }
 
 .portrait img {
     width: 100%;
-    aspect-ratio: 3 / 4;
+    height: 100%;
     object-fit: cover;
-    background: var(--sky);
+    object-position: 50% 38%;
 }
 
-/* ---------- Sections: a label in the margin, content beside it ---------- */
+/* ---------- Sections: a label in the margin, entries beside it ---------- */
 
 .section {
     display: grid;
-    grid-template-columns: var(--label) minmax(0, 1fr);
-    column-gap: clamp(1.5rem, 4vw, 3rem);
-    padding-block: clamp(2rem, 4.5vw, 3.25rem);
+    grid-template-columns: var(--label) minmax(0, var(--measure));
+    column-gap: clamp(2rem, 5vw, 4.5rem);
+    padding-block: 1.6rem 1.9rem;
+    border-top: 1px solid var(--rule);
 }
 
 .section > h2 {
     font-size: 1.0625rem;
     font-weight: 800;
-    line-height: 1.3;
-    letter-spacing: -0.005em;
+    line-height: 1.4;
 }
 
-.section > h2::before {
-    content: "";
-    display: block;
-    width: 1.75rem;
-    height: 0.3rem;
-    margin-bottom: 0.7rem;
-    background: var(--ink);
-}
-
-.body > * + * { margin-top: 1.9rem; }
+.body > * + * { margin-top: 1.2rem; }
 
 .entry {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 1.5rem;
-    row-gap: 0.3rem;
+    column-gap: 1.25rem;
     align-items: baseline;
 }
 
 .entry h3 {
-    font-size: 1.1875rem;
+    font-size: 1.0625rem;
     font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+    line-height: 1.4;
+    letter-spacing: -0.005em;
 }
 
-/* A paper: the title is the link, and it is set larger. */
-.entry-lead h3 {
-    font-size: clamp(1.375rem, 2.4vw, 1.75rem);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+/* What follows the name in a heading: the association, the degree. */
+.entry h3 span {
+    margin-left: 0.35em;
+    color: var(--muted);
+    font-weight: 400;
 }
-
-.entry-lead h3 a { color: var(--ink); }
-.entry-lead h3 a:hover { color: var(--link); }
-.entry-lead > p { margin-top: 0.3rem; }
 
 .when {
-    color: var(--ink-soft);
-    font-size: 0.9375rem;
-    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 0.875rem;
     white-space: nowrap;
 }
 
-.entry > p,
+.entry > .meta,
+.entry > .text,
 .entry > .links { grid-column: 1 / -1; }
 
-.entry > p { max-width: 40em; }
+.meta {
+    color: var(--muted);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+}
 
-.links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem 1.5rem;
+.text {
     margin-top: 0.25rem;
-    font-weight: 600;
+    font-family: var(--serif);
+    font-size: 1.0625rem;
+    line-height: 1.5;
 }
 
-/* ---------- Education, drawn as a route ---------- */
+.entry > .links { margin-top: 0.35rem; }
 
-.hops {
-    --node: 2.25rem;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    column-gap: 1.5rem;
-    counter-reset: hop;
-}
-
-.hop {
-    position: relative;
-    padding-top: calc(var(--node) + 1.1rem);
-    counter-increment: hop;
-}
-
-/* The link to the next hop. */
-.hop::before {
-    content: "";
-    position: absolute;
-    top: calc(var(--node) / 2 - 1px);
-    left: 0;
-    right: -1.5rem;
-    border-top: 2px solid var(--ink);
-}
-
-/* The route is still open after the last hop. */
-.hop:last-child::before {
-    right: 0;
-    border-top-style: dashed;
-    border-top-color: var(--rule);
-}
-
-/* The node, numbered like a hop of a traceroute. */
-.hop::after {
-    content: counter(hop);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: var(--node);
-    height: var(--node);
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    background: var(--paper);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    line-height: calc(var(--node) - 4px);
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-}
-
-.hop-now::after {
-    border-color: var(--meadow);
-    background: var(--meadow);
-    color: var(--paper);
-    box-shadow: 0 0 0 0.3rem rgba(106, 156, 52, 0.22);
-}
-
-.hop-place {
-    color: var(--ink-soft);
-    font-size: 0.9375rem;
-}
-
-.hop h3 {
-    margin-top: 0.1rem;
-    font-size: 1.375rem;
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-}
-
-.hop-what { margin-top: 0.5rem; max-width: 22em; }
-.hop .when { display: block; margin-top: 0.5rem; }
-
-/* One moment of motion: the route draws itself once, on load. */
-@media (prefers-reduced-motion: no-preference) {
-    .hop::before {
-        transform-origin: left center;
-        animation: draw 0.5s cubic-bezier(0.3, 0, 0.2, 1) both;
-    }
-    .hop::after { animation: arrive 0.3s ease-out both; }
-    .hop:nth-child(1)::after { animation-delay: 0.15s; }
-    .hop:nth-child(1)::before { animation-delay: 0.3s; }
-    .hop:nth-child(2)::after { animation-delay: 0.7s; }
-    .hop:nth-child(2)::before { animation-delay: 0.85s; }
-    .hop:nth-child(3)::after { animation-delay: 1.25s; }
-    .hop:nth-child(3)::before { animation-delay: 1.4s; }
-}
-
-@keyframes draw {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
-}
-
-@keyframes arrive {
-    from { transform: scale(0.4); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-/* ---------- Skills ---------- */
-
-.facts {
-    display: grid;
-    grid-template-columns: 12rem minmax(0, 1fr);
-    gap: 0.9rem 1.5rem;
-}
-
-.facts dt { font-weight: 700; }
-.facts dd { max-width: 36em; }
+/* Leadership: one line of role and dates, one line of what it was. */
+.compact > * + * { margin-top: 0.75rem; }
+.compact .text { margin-top: 0; color: var(--muted); font-size: 1rem; line-height: 1.45; }
 
 /* ---------- Footer ---------- */
 
 .foot {
-    margin-top: clamp(2rem, 5vw, 4rem);
-    padding-block: 1.75rem 2.5rem;
+    padding-block: 1.5rem 2.5rem;
     border-top: 1px solid var(--rule);
-    color: var(--ink-soft);
-    font-size: 0.9375rem;
+    color: var(--muted);
+    font-size: 0.875rem;
 }
 
 /* ---------- Narrow screens ---------- */
 
-@media (max-width: 50rem) {
-    .section { grid-template-columns: minmax(0, 1fr); row-gap: 1.4rem; }
-
-    .hops { grid-template-columns: minmax(0, 1fr); row-gap: 1.75rem; }
-
-    .hop {
-        padding-top: 0;
-        padding-left: calc(var(--node) + 1.1rem);
-        min-height: var(--node);
-    }
-
-    .hop::before {
-        top: 0;
-        bottom: -1.75rem;
-        left: calc(var(--node) / 2 - 1px);
-        right: auto;
-        border-top: 0;
-        border-left: 2px solid var(--ink);
-        transform-origin: center top;
-    }
-
-    .hop:last-child::before {
-        bottom: 0;
-        border-left-style: dashed;
-        border-left-color: var(--rule);
-    }
-
-    .hop-place { padding-top: 0.3rem; }
-
-    @keyframes draw {
-        from { transform: scaleY(0); }
-        to { transform: scaleY(1); }
-    }
+@media (max-width: 54rem) {
+    .section { grid-template-columns: minmax(0, 1fr); row-gap: 0.9rem; }
 }
 
 @media (max-width: 40rem) {
-    .hero {
-        grid-template-columns: minmax(0, 1fr);
-        row-gap: 2rem;
-    }
+    .bar { align-items: flex-start; gap: 0.75rem; }
+    .bar-links { flex: 1; justify-content: flex-start; gap: 0.2rem 1rem; margin-left: 0; }
+    .bar .home + .bar-links { padding-top: 0.15rem; }
 
-    .portrait img {
-        aspect-ratio: 5 / 4;
-        object-position: 50% 42%;
-    }
+    .intro { grid-template-columns: minmax(0, 1fr) 6.5rem; column-gap: 1rem; }
+    .intro-text { display: contents; }
+    .intro h1 { grid-column: 1; grid-row: 1; align-self: end; }
+    .role { grid-column: 1; grid-row: 2; }
+    .portrait { grid-column: 2; grid-row: 1 / 3; align-self: start; }
+    .bio, .intro .links { grid-column: 1 / -1; }
 
     .entry { grid-template-columns: minmax(0, 1fr); }
-    .facts { grid-template-columns: minmax(0, 1fr); row-gap: 0.15rem; }
-    .facts dd + dt { margin-top: 0.9rem; }
 }
 
 /* ---------- Print ---------- */
 
 @media print {
-    body { font-size: 10.5pt; }
-    .skip { display: none; }
-    .hero { padding-block: 0 1.5rem; grid-template-columns: minmax(0, 1fr) 9rem; }
-    .name { font-size: 4rem; }
-    .section { padding-block: 1rem; break-inside: avoid; }
-    a { color: var(--ink); }
-    .hop-now::after { box-shadow: none; }
+    body { font-size: 10pt; }
+    .skip, .bar { display: none; }
+    .wrap { max-width: none; padding: 0; }
+    .intro { padding-top: 0; grid-template-columns: minmax(0, 1fr) 8rem; }
+    .section { padding-block: 0.9rem; break-inside: avoid; }
 }

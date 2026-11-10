@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Adam Bekkar</title>
-<meta name="description" content="Adam Bekkar, MSc student in Computer Science at ETH Zürich. Papers, projects, background and contact.">
+<meta name="description" content="Adam Bekkar, MSc student in Computer Science at ETH Zürich. Research and projects.">
 <meta name="author" content="Adam Bekkar">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#1b2063">
 <link rel="canonical" href="https://adam.bekkar.ch/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Adam Bekkar">
-<meta property="og:description" content="MSc student in Computer Science at ETH Zürich. Papers, projects, background and contact.">
+<meta property="og:description" content="MSc student in Computer Science at ETH Zürich. Research and projects.">
 <meta property="og:url" content="https://adam.bekkar.ch/">
 <meta property="og:image" content="https://adam.bekkar.ch/assets/img/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -22,6 +22,7 @@
 <link rel="icon" href="assets/img/favicon.png" sizes="48x48" type="image/png">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/stix-two-text-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
@@ -30,81 +31,67 @@
 
 <div class="wrap">
 
-  <header class="hero">
-    <div>
-      <h1 class="name"><span>Adam</span> <span>Bekkar</span></h1>
+  <nav class="bar" aria-label="Site">
+    <ul class="bar-links">
+      <li><a href="#research">Research</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#leadership">Leadership</a></li>
+    </ul>
+  </nav>
+
+  <header class="intro">
+    <div class="intro-text">
+      <h1>Adam Bekkar</h1>
       <p class="role">MSc student in Computer Science at ETH Zürich</p>
-      <p class="lede">I like building systems that have to work on the day: a virtual network for programming contests, the web app about 1,000 new EPFL students use in their welcome week, benchmarks of memory allocators on CXL hardware.</p>
-      <ul class="contact">
+      <p class="bio">My research interests are machine learning, probabilistic models, optimization, and computer systems. I am currently a research intern at the DCL Lab at EPFL, working on interactive consistency under a dishonest majority. I did my bachelor's at EPFL, where I also led a student association and built the systems that student events run on.</p>
+      <ul class="links">
         <li><a href="mailto:abekkar@student.ethz.ch">abekkar@student.ethz.ch</a></li>
-        <li><a href="https://www.linkedin.com/in/adam-bekkar/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
         <li><a href="https://github.com/Zeleph25/" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/adam-bekkar/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
       </ul>
     </div>
     <figure class="portrait">
       <picture>
-        <source type="image/webp" srcset="assets/img/portrait-450.webp 450w, assets/img/portrait.webp 900w" sizes="(max-width: 40rem) 100vw, 22rem">
-        <img src="assets/img/portrait.jpg" srcset="assets/img/portrait-450.jpg 450w, assets/img/portrait.jpg 900w" sizes="(max-width: 40rem) 100vw, 22rem" width="900" height="1200" alt="Adam Bekkar standing in a field, hills behind him">
+        <source type="image/webp" srcset="assets/img/portrait-450.webp 450w, assets/img/portrait.webp 900w" sizes="(max-width: 40rem) 6.5rem, 14.5rem">
+        <img src="assets/img/portrait.jpg" srcset="assets/img/portrait-450.jpg 450w, assets/img/portrait.jpg 900w" sizes="(max-width: 40rem) 6.5rem, 14.5rem" width="900" height="1200" alt="Adam Bekkar standing in a field, hills behind him">
       </picture>
     </figure>
   </header>
 
   <main id="main">
 
-    <section class="section" id="education" aria-labelledby="education-h">
-      <h2 id="education-h">Education</h2>
-      <ol class="hops">
-        <li class="hop">
-          <p class="hop-place">Casablanca, Morocco</p>
-          <h3>Lycée Lyautey</h3>
-          <p class="hop-what">French Baccalaureate with Highest Honours in Mathematics and Physics.</p>
-          <span class="when">2020 &ndash; 2023</span>
-        </li>
-        <li class="hop">
-          <p class="hop-place">Lausanne</p>
-          <h3>EPFL</h3>
-          <p class="hop-what">Bachelor of Science in Computer Science. Average: 5.1/6.</p>
-          <span class="when">2023 &ndash; 2026</span>
-        </li>
-        <li class="hop hop-now">
-          <p class="hop-place">Zürich</p>
-          <h3>ETH Zürich</h3>
-          <p class="hop-what">Master of Science in Computer Science. Intended major in Machine Intelligence.</p>
-          <span class="when">2026 &ndash; Present</span>
-        </li>
-      </ol>
-    </section>
-
-    <section class="section" id="papers" aria-labelledby="papers-h">
-      <h2 id="papers-h">Papers</h2>
+    <section class="section" id="research" aria-labelledby="research-h">
+      <h2 id="research-h">Research</h2>
       <div class="body">
-        <article class="entry entry-lead">
+        <article class="entry">
+          <h3>Polaris: interactive consistency under a dishonest majority</h3>
+          <span class="when">Sep 2026 &ndash; present</span>
+          <p class="meta">Research intern, DCL Lab, EPFL. With Prof. Rachid Guerraoui, supervised by Grigorii Emdin.</p>
+          <p class="text">A Rust implementation of a protocol in which an elected leader broadcasts one verifiable vector instead of running n parallel Byzantine broadcasts, built to measure it against those baselines.</p>
+          <ul class="links">
+            <li><a href="https://github.com/Zeleph25/polaris" target="_blank" rel="noopener noreferrer">Code</a></li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>CXL Allocator</h3>
+          <span class="when">Jun 2026 &ndash; Aug 2026</span>
+          <p class="meta">Research intern, RS3 Lab, EPFL. With Prof. Sanidhya Kashyap, supervised by Musa Ünal.</p>
+          <p class="text">Benchmarked NUMA allocators against jemalloc, tcmalloc, mimalloc, glibc, and others, and explored allocation strategies to reduce latency across the CXL interconnect.</p>
+        </article>
+
+        <article class="entry">
           <h3><a href="papers/vnet/">vNet: a centrally enforced overlay network for on-site programming contests</a></h3>
           <span class="when">Nov 2026</span>
-          <p>An on-site contest needs a network in which each contestant machine reaches a few organizer services and nothing else, on infrastructure the organizers do not control. The paper covers the design, the implementation in C++17, tests that play the adversary, and measurements.</p>
+          <p class="meta">Technical report.</p>
+          <p class="text">The design, implementation and evaluation of an overlay network in which every packet of a contestant machine is checked on machines the organizers control.</p>
           <ul class="links">
             <li><a href="papers/vnet/">Read online</a></li>
             <li><a href="papers/vnet/bekkar-vnet-2026.pdf">PDF</a></li>
-            <li><a href="https://github.com/polympiads/vNet" target="_blank" rel="noopener noreferrer">Source code</a></li>
+            <li><a href="https://github.com/polympiads/vNet" target="_blank" rel="noopener noreferrer">Code</a></li>
             <li><a href="https://github.com/polympiads/vNet-benchmarks" target="_blank" rel="noopener noreferrer">Benchmarks</a></li>
           </ul>
-        </article>
-      </div>
-    </section>
-
-    <section class="section" id="experience" aria-labelledby="experience-h">
-      <h2 id="experience-h">Experience</h2>
-      <div class="body">
-        <article class="entry">
-          <h3>Research Intern, RS3 Lab, EPFL</h3>
-          <span class="when">Jun 2026 &ndash; Aug 2026</span>
-          <p>Benchmarked NUMAlloc, a NUMA-aware memory allocator, against five others on a server with CXL memory, and explored allocation strategies to reduce latency overhead across the CXL interconnect. Fixed four problems that kept NUMAlloc from running on a current glibc and kernel.</p>
-        </article>
-
-        <article class="entry">
-          <h3>Student Assistant at EPFL, Practice of OOP (CS&#8209;108)</h3>
-          <span class="when">Feb 2025 &ndash; Jun 2025</span>
-          <p>Supported students in learning Java, object-oriented programming, and core data structures, and assisted with the ReCHor project.</p>
         </article>
       </div>
     </section>
@@ -113,104 +100,94 @@
       <h2 id="projects-h">Projects</h2>
       <div class="body">
         <article class="entry">
-          <h3>vNet, Polympiads</h3>
-          <p>An overlay network built for the HC2 and Prologin informatics contests. Each contestant machine reaches only what the rules allow, and every packet is checked on machines the organizers run. About 6,600 lines of C++17, open source.</p>
+          <h3>vNet <span>Polympiads</span></h3>
+          <p class="text">Built a distributed virtual network for the HC2 and Prologin informatics contests.</p>
           <ul class="links">
             <li><a href="papers/vnet/">Paper</a></li>
-            <li><a href="https://github.com/polympiads/vNet" target="_blank" rel="noopener noreferrer">Source code</a></li>
-            <li><a href="https://github.com/polympiads/vNet-benchmarks" target="_blank" rel="noopener noreferrer">Benchmarks</a></li>
+            <li><a href="https://github.com/polympiads/vNet" target="_blank" rel="noopener noreferrer">Code</a></li>
           </ul>
         </article>
 
         <article class="entry">
-          <h3>S4S&#8209;Connect</h3>
-          <p>Developed the web app used by ~1,000 incoming EPFL students each year during the association's welcome week, providing their agenda, course materials, and activity registration.</p>
+          <h3>S4S&#8209;Connect <span>Students 4 Students</span></h3>
+          <p class="text">Built a web app for students' agendas, course materials, and activity registration, used by 1,000+ new students at the events each year.</p>
           <ul class="links">
-            <li><a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">Students 4 Students website</a></li>
+            <li><a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">students4students.ch</a></li>
           </ul>
         </article>
 
         <article class="entry">
-          <h3>OnePass, Android Ticketing App</h3>
-          <p>Final project for CS&#8209;311 (The Software Enterprise), an Android app simplifying event ticketing in Lausanne with live event maps, digital ticket resale, and QR code validation. Voted 4th best app of the course among 200+ students.</p>
+          <h3>OnePass <span>Android ticketing app</span></h3>
+          <p class="text">Android event-ticketing app (Kotlin, Firebase) with resale and offline validation of signed QR codes. Top 4 among 200+ students.</p>
           <ul class="links">
-            <li><a href="https://github.com/onepass-ch/onepass" target="_blank" rel="noopener noreferrer">OnePass repository</a></li>
+            <li><a href="https://github.com/onepass-ch/onepass" target="_blank" rel="noopener noreferrer">Code</a></li>
           </ul>
         </article>
       </div>
     </section>
 
-    <section class="section" id="representation" aria-labelledby="representation-h">
-      <h2 id="representation-h">Academic Representation</h2>
+    <section class="section" id="education" aria-labelledby="education-h">
+      <h2 id="education-h">Education</h2>
       <div class="body">
         <article class="entry">
-          <h3>Student Delegate, Computer Science Section</h3>
-          <span class="when">Sep 2025 &ndash; Sep 2026</span>
-          <p>Represented students in discussions with teachers, gathered feedback and proposed improvements.</p>
+          <h3>ETH Zürich <span>MSc in Computer Science</span></h3>
+          <span class="when">2026 &ndash; present</span>
+          <p class="text">Intended major in Machine Intelligence. Currently taking Advanced Machine Learning, Optimization for Data Science, Probabilistic Artificial Intelligence, and Linear &amp; Combinatorial Optimization.</p>
         </article>
 
         <article class="entry">
-          <h3>Student Body Member, School Council, IC Faculty</h3>
-          <span class="when">Sep 2025 &ndash; Sep 2026</span>
-          <p>Represented students in the IC Faculty Council, ensuring student concerns were heard during faculty discussions.</p>
+          <h3>EPFL <span>BSc in Computer Science</span></h3>
+          <span class="when">2023 &ndash; 2026</span>
+          <p class="text">Average 5.1/6. Research internship at the RS3 Lab, and student assistant for Practice of Object-Oriented Programming (CS&#8209;108).</p>
         </article>
       </div>
     </section>
 
-    <section class="section" id="associations" aria-labelledby="associations-h">
-      <h2 id="associations-h">Student Associations</h2>
-      <div class="body">
+    <section class="section" id="leadership" aria-labelledby="leadership-h">
+      <h2 id="leadership-h">Leadership</h2>
+      <div class="body compact">
         <article class="entry">
-          <h3>Copresident, Students 4 Students</h3>
+          <h3>Co-President <span>Students 4 Students</span></h3>
           <span class="when">Oct 2025 &ndash; Sep 2026</span>
-          <p>Led the organizing team of twenty and coordinated more than a hundred staff for the week preparing new students for EPFL studies.</p>
-          <ul class="links">
-            <li><a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">students4students.ch</a></li>
-          </ul>
+          <p class="text">Led an organizing team of twenty and coordinated more than a hundred staff for the week that prepares new students for EPFL.</p>
         </article>
 
         <article class="entry">
-          <h3>IT Manager, Students 4 Students</h3>
+          <h3>IT Manager <span>Students 4 Students</span></h3>
           <span class="when">Oct 2024 &ndash; Oct 2025</span>
-          <p>Managed IT for three events totaling 1,000+ participants. Built S4S&#8209;Connect, a web app for students' agenda, course materials, and activity registration.</p>
-          <ul class="links">
-            <li><a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">students4students.ch</a></li>
-          </ul>
+          <p class="text">Ran IT for three events with 1,000+ participants and built S4S&#8209;Connect.</p>
         </article>
 
         <article class="entry">
-          <h3>IT Manager, Polympiads</h3>
+          <h3>IT Manager <span>Polympiads</span></h3>
           <span class="when">Sep 2025 &ndash; Sep 2026</span>
-          <p>Built and maintained a virtual network on a distributed system infrastructure used for both HC2 and Prologin, annual Informatics Olympiad events each hosting 300+ participants at EPFL.</p>
+          <p class="text">Built and maintained the distributed virtual network used for HC2 and Prologin, each hosting 300+ participants at EPFL.</p>
         </article>
 
         <article class="entry">
-          <h3>Member, IT Team of AGEPoly</h3>
+          <h3>Student Delegate <span>Computer Science Section</span></h3>
           <span class="when">Sep 2025 &ndash; Sep 2026</span>
-          <p>Contributed to Trust, a comprehensive rewrite of truffe2.agepoly.ch, a platform that allows campus associations to borrow equipment, manage room bookings, and handle team accreditations.</p>
-          <ul class="links">
-            <li><a href="https://gitlab.com/agepoly/it/dev/trust" target="_blank" rel="noopener noreferrer">Trust repository</a></li>
-          </ul>
+          <p class="text">Represented students in discussions with faculty, collected feedback, and proposed improvements.</p>
+        </article>
+
+        <article class="entry">
+          <h3>Student Body Member <span>School Council, IC Faculty</span></h3>
+          <span class="when">Sep 2025 &ndash; Sep 2026</span>
+          <p class="text">Represented students on the IC Faculty Council.</p>
+        </article>
+
+        <article class="entry">
+          <h3>Member <span>IT Team of AGEPoly</span></h3>
+          <span class="when">Sep 2025 &ndash; Sep 2026</span>
+          <p class="text">Contributed to Trust, a rewrite of truffe2.agepoly.ch, the platform campus associations use to borrow equipment, book rooms, and manage accreditations.</p>
         </article>
       </div>
-    </section>
-
-    <section class="section" id="languages-skills" aria-labelledby="skills-h">
-      <h2 id="skills-h">Languages &amp; Skills</h2>
-      <dl class="facts">
-        <dt>Programming languages</dt>
-        <dd>Java, Scala, C, C++, Rust, Python, Kotlin, SQL, Verilog, LaTeX, RISC&#8209;V</dd>
-        <dt>Databases and tools</dt>
-        <dd>PostgreSQL, MySQL, Git, Docker, Grafana, SonarQube</dd>
-        <dt>Spoken languages</dt>
-        <dd>French (native), Arabic (native), English (C1), German (beginner, currently learning)</dd>
-      </dl>
     </section>
 
   </main>
 
   <footer class="foot">
-    <p id="updated">Adam Bekkar, updated 2026</p>
+    <p id="updated">Adam Bekkar, 2026</p>
   </footer>
 
 </div>
