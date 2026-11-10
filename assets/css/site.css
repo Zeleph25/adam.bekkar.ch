@@ -1,0 +1,384 @@
+/* Shared styles: fonts, colors, the page frame and the home page.
+   The paper pages add assets/css/paper.css on top of this file. */
+
+@font-face {
+    font-family: "Schibsted Grotesk";
+    src: url("../fonts/schibsted-grotesk-latin-wght-normal.woff2") format("woff2");
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    /* Taken from the portrait: the hoodie, the sky and the field. */
+    --ink: #1b2063;
+    --ink-soft: #4d5290;
+    --link: #4330d4;
+    --sky: #edf3fb;
+    --rule: #c5d3ec;
+    --meadow: #6a9c34;
+    --paper: #ffffff;
+
+    --sans: "Schibsted Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+    --gutter: clamp(1.25rem, 5vw, 3.5rem);
+    --label: 11rem;
+    color-scheme: light;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+    background: var(--paper);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img { display: block; max-width: 100%; height: auto; }
+
+a {
+    color: var(--link);
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.07em;
+    text-underline-offset: 0.2em;
+}
+
+a:hover { color: var(--ink); text-decoration-thickness: 0.14em; }
+
+a:focus-visible {
+    outline: 3px solid var(--link);
+    outline-offset: 3px;
+}
+
+.skip {
+    position: absolute;
+    left: var(--gutter);
+    top: -4rem;
+    padding: 0.5rem 0.9rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 600;
+    z-index: 10;
+}
+
+.skip:focus { top: 0.75rem; color: var(--paper); }
+
+.wrap {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(13rem, 30vw, 22rem);
+    column-gap: clamp(1.5rem, 5vw, 4.5rem);
+    align-items: end;
+    padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.name {
+    /* The optical margin pulls the heavy A back onto the text edge. */
+    margin: 0 0 0.3em -0.045em;
+    font-size: clamp(4.25rem, 13.2vw, 10.75rem);
+    font-weight: 800;
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+}
+
+.name span { display: block; }
+
+.role {
+    font-size: clamp(1.2rem, 2.1vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+
+.lede {
+    margin-top: 0.5rem;
+    max-width: 34em;
+    font-size: clamp(1.1rem, 1.7vw, 1.25rem);
+    line-height: 1.45;
+    color: var(--ink-soft);
+}
+
+.contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.75rem;
+    margin-top: 1.6rem;
+    font-weight: 600;
+}
+
+.portrait img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    background: var(--sky);
+}
+
+/* ---------- Sections: a label in the margin, content beside it ---------- */
+
+.section {
+    display: grid;
+    grid-template-columns: var(--label) minmax(0, 1fr);
+    column-gap: clamp(1.5rem, 4vw, 3rem);
+    padding-block: clamp(2rem, 4.5vw, 3.25rem);
+}
+
+.section > h2 {
+    font-size: 1.0625rem;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+}
+
+.section > h2::before {
+    content: "";
+    display: block;
+    width: 1.75rem;
+    height: 0.3rem;
+    margin-bottom: 0.7rem;
+    background: var(--ink);
+}
+
+.body > * + * { margin-top: 1.9rem; }
+
+.entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 1.5rem;
+    row-gap: 0.3rem;
+    align-items: baseline;
+}
+
+.entry h3 {
+    font-size: 1.1875rem;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+.when {
+    color: var(--ink-soft);
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.entry > p,
+.entry > .links { grid-column: 1 / -1; }
+
+.entry > p { max-width: 40em; }
+
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.5rem;
+    margin-top: 0.25rem;
+    font-weight: 600;
+}
+
+/* ---------- Education, drawn as a route ---------- */
+
+.hops {
+    --node: 2.25rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1.5rem;
+    counter-reset: hop;
+}
+
+.hop {
+    position: relative;
+    padding-top: calc(var(--node) + 1.1rem);
+    counter-increment: hop;
+}
+
+/* The link to the next hop. */
+.hop::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--node) / 2 - 1px);
+    left: 0;
+    right: -1.5rem;
+    border-top: 2px solid var(--ink);
+}
+
+/* The route is still open after the last hop. */
+.hop:last-child::before {
+    right: 0;
+    border-top-style: dashed;
+    border-top-color: var(--rule);
+}
+
+/* The node, numbered like a hop of a traceroute. */
+.hop::after {
+    content: counter(hop);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--node);
+    height: var(--node);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: calc(var(--node) - 4px);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.hop-now::after {
+    border-color: var(--meadow);
+    background: var(--meadow);
+    color: var(--paper);
+    box-shadow: 0 0 0 0.3rem rgba(106, 156, 52, 0.22);
+}
+
+.hop-place {
+    color: var(--ink-soft);
+    font-size: 0.9375rem;
+}
+
+.hop h3 {
+    margin-top: 0.1rem;
+    font-size: 1.375rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.hop-what { margin-top: 0.5rem; max-width: 22em; }
+.hop .when { display: block; margin-top: 0.5rem; }
+
+/* One moment of motion: the route draws itself once, on load. */
+@media (prefers-reduced-motion: no-preference) {
+    .hop::before {
+        transform-origin: left center;
+        animation: draw 0.5s cubic-bezier(0.3, 0, 0.2, 1) both;
+    }
+    .hop::after { animation: arrive 0.3s ease-out both; }
+    .hop:nth-child(1)::after { animation-delay: 0.15s; }
+    .hop:nth-child(1)::before { animation-delay: 0.3s; }
+    .hop:nth-child(2)::after { animation-delay: 0.7s; }
+    .hop:nth-child(2)::before { animation-delay: 0.85s; }
+    .hop:nth-child(3)::after { animation-delay: 1.25s; }
+    .hop:nth-child(3)::before { animation-delay: 1.4s; }
+}
+
+@keyframes draw {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+@keyframes arrive {
+    from { transform: scale(0.4); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Skills ---------- */
+
+.facts {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 0.9rem 1.5rem;
+}
+
+.facts dt { font-weight: 700; }
+.facts dd { max-width: 36em; }
+
+/* ---------- Footer ---------- */
+
+.foot {
+    margin-top: clamp(2rem, 5vw, 4rem);
+    padding-block: 1.75rem 2.5rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: 0.9375rem;
+}
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 50rem) {
+    .section { grid-template-columns: minmax(0, 1fr); row-gap: 1.4rem; }
+
+    .hops { grid-template-columns: minmax(0, 1fr); row-gap: 1.75rem; }
+
+    .hop {
+        padding-top: 0;
+        padding-left: calc(var(--node) + 1.1rem);
+        min-height: var(--node);
+    }
+
+    .hop::before {
+        top: 0;
+        bottom: -1.75rem;
+        left: calc(var(--node) / 2 - 1px);
+        right: auto;
+        border-top: 0;
+        border-left: 2px solid var(--ink);
+        transform-origin: center top;
+    }
+
+    .hop:last-child::before {
+        bottom: 0;
+        border-left-style: dashed;
+        border-left-color: var(--rule);
+    }
+
+    .hop-place { padding-top: 0.3rem; }
+
+    @keyframes draw {
+        from { transform: scaleY(0); }
+        to { transform: scaleY(1); }
+    }
+}
+
+@media (max-width: 40rem) {
+    .hero {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 2rem;
+    }
+
+    .portrait img {
+        aspect-ratio: 5 / 4;
+        object-position: 50% 42%;
+    }
+
+    .entry { grid-template-columns: minmax(0, 1fr); }
+    .facts { grid-template-columns: minmax(0, 1fr); row-gap: 0.15rem; }
+    .facts dd + dt { margin-top: 0.9rem; }
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+    body { font-size: 10.5pt; }
+    .skip { display: none; }
+    .hero { padding-block: 0 1.5rem; grid-template-columns: minmax(0, 1fr) 9rem; }
+    .name { font-size: 4rem; }
+    .section { padding-block: 1rem; break-inside: avoid; }
+    a { color: var(--ink); }
+    .hop-now::after { box-shadow: none; }
+}

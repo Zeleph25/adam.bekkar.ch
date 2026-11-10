@@ -1,624 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Adam Bekkar - Computer Science, ETH Zürich. Projects, background, and contact." />
-<meta name="author" content="Adam Bekkar" />
-<meta name="robots" content="index, follow" />
-<meta name="theme-color" content="#fcfbf8" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adam Bekkar</title>
+<meta name="description" content="Adam Bekkar, MSc student in Computer Science at ETH Zürich. Projects, background and contact.">
+<meta name="author" content="Adam Bekkar">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1b2063">
+<link rel="canonical" href="https://adam.bekkar.ch/">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/img/favicon.png" sizes="48x48" type="image/png">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<title>Adam Bekkar</title>
-<style>
-:root {
-    --paper: #fcfbf8;
-    --ink: #1b1b1b;
-    --ink-soft: #55534c;
-    --ink-faint: #8b887d;
-    --rule: #d8d3c4;
-    --rule-strong: #b9b29d;
-    --accent: #2c4a6e;
-    --accent-soft: #6f88a3;
-
-    --font-display: 'Fraunces', 'Iowan Old Style', serif;
-    --font-body: 'Source Serif 4', Georgia, serif;
-    --font-mono: 'IBM Plex Mono', 'SF Mono', Menlo, monospace;
-}
-
-* { box-sizing: border-box; }
-
-html { background: var(--paper); }
-
-body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--font-body);
-    font-size: 17px;
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-}
-
-.page {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 5.5rem 1.75rem 4rem;
-}
-
-/* ---------- Header ---------- */
-
-.cv-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2.75rem;
-    padding-bottom: 2.25rem;
-    border-bottom: 1px solid var(--rule-strong);
-    margin-bottom: 3rem;
-}
-
-.header-text { flex: 1; min-width: 0; }
-
-.name {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 2.5rem;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    margin: 0 0 0.35rem;
-    line-height: 1.05;
-    color: var(--ink);
-}
-
-.byline {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin: 0 0 1.1rem;
-}
-
-.tagline {
-    font-style: italic;
-    color: var(--ink-soft);
-    font-size: 1.02rem;
-    margin: 0 0 1.1rem;
-    max-width: 46ch;
-}
-
-.contact-line {
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    color: var(--ink-soft);
-    margin: 0;
-}
-
-.contact-line a {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-}
-
-.contact-line a:hover { border-bottom-color: var(--accent-soft); }
-
-.contact-line .sep {
-    color: var(--rule-strong);
-    margin: 0 0.5em;
-}
-
-.cv-download { margin: 1.1rem 0 0; }
-
-.cv-download a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--paper);
-    background: var(--accent);
-    padding: 0.55rem 1.1rem;
-    text-decoration: none;
-    border: 1px solid var(--accent);
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.cv-download a:hover {
-    background: transparent;
-    color: var(--accent);
-}
-
-/* photo with crop-mark corners */
-.photo-frame {
-    position: relative;
-    width: 148px;
-    height: 148px;
-    flex-shrink: 0;
-    margin: 6px;
-}
-
-.photo-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    filter: grayscale(15%);
-    background: var(--rule);
-}
-
-.corner {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-color: var(--accent);
-    border-style: solid;
-}
-
-.corner.tl { top: -6px; left: -6px; border-width: 1.5px 0 0 1.5px; }
-.corner.tr { top: -6px; right: -6px; border-width: 1.5px 1.5px 0 0; }
-.corner.bl { bottom: -6px; left: -6px; border-width: 0 0 1.5px 1.5px; }
-.corner.br { bottom: -6px; right: -6px; border-width: 0 1.5px 1.5px 0; }
-
-/* ---------- Sections ---------- */
-
-.cv-section { margin-bottom: 3rem; }
-
-.cv-section h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.6em;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--ink);
-    margin: 0 0 1.5rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 1.5px solid var(--accent);
-}
-
-.cv-section h2::before {
-    content: "";
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    background: var(--accent);
-    flex-shrink: 0;
-}
-
-.category-label {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-style: italic;
-    font-size: 1.05rem;
-    color: var(--accent);
-    margin: 2rem 0 1rem;
-}
-
-.category-label:first-of-type { margin-top: 0; }
-
-/* ---------- Background lists ---------- */
-
-.entry-block { margin-bottom: 1.6rem; }
-.entry-block:last-child { margin-bottom: 0; }
-
-.block-label {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    font-weight: 500;
-    margin: 0 0 0.75rem;
-}
-
-.chip-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.chip-list li {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--ink-soft);
-    border: 1px solid var(--rule);
-    padding: 0.25rem 0.65rem;
-    line-height: 1.3;
-    transition: border-color 0.15s ease, color 0.15s ease;
-}
-
-.chip-list li:hover {
-    border-color: var(--accent-soft);
-    color: var(--ink);
-}
-
-.chip-list.small li { font-size: 0.72rem; padding: 0.18rem 0.5rem; }
-
-.lang-list { list-style: none; margin: 0; padding: 0; }
-
-.lang-list li {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px dotted var(--rule);
-    max-width: 380px;
-}
-
-.lang-list li:last-child { border-bottom: none; }
-
-.lang-name { flex: 1; color: var(--ink); }
-
-.lang-level {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    color: var(--accent);
-    letter-spacing: 0.04em;
-}
-
-/* ---------- Project / event entries ---------- */
-
-.entry {
-    margin-bottom: 1.4rem;
-    padding-left: 1rem;
-    border-left: 2px solid var(--rule);
-    transition: border-color 0.15s ease;
-}
-
-.entry:hover { border-left-color: var(--accent-soft); }
-
-.entry-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-.entry-title {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 1.12rem;
-    margin: 0;
-    color: var(--ink);
-}
-
-.entry-meta {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--ink-faint);
-    letter-spacing: 0.03em;
-    white-space: nowrap;
-}
-
-.entry-desc { margin: 0.35rem 0 0; color: var(--ink-soft); font-size: 0.98rem; }
-.entry-desc.placeholder { font-style: italic; color: var(--ink-faint); margin: 0; }
-
-.entry-links { margin: 0.55rem 0 0; }
-
-.entry-links a {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px solid var(--accent-soft);
-}
-
-.entry-links a:hover { color: var(--accent-soft); }
-
-.entry .chip-list { margin-top: 0.65rem; }
-
-/* ---------- Colophon ---------- */
-
-.colophon {
-    margin-top: 4rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--rule);
-    text-align: center;
-}
-
-.colophon p {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
-    color: var(--ink-faint);
-    margin: 0;
-}
-
-/* ---------- Responsive ---------- */
-
-@media (max-width: 600px) {
-    .page { padding: 3rem 1.25rem 3rem; }
-    .cv-header { flex-direction: column-reverse; align-items: flex-start; gap: 1.25rem; }
-    .photo-frame { width: 112px; height: 112px; }
-    .name { font-size: 1.9rem; }
-    .entry-head { flex-direction: column; gap: 0.2rem; }
-}
-
-/* ---------- Print ---------- */
-
-@media print {
-    body { font-size: 12pt; }
-    .page { max-width: 100%; padding: 0; }
-    a { color: var(--ink) !important; }
-    .photo-frame img { filter: none; }
-}
-</style>
+<link rel="preload" href="assets/fonts/schibsted-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body>
 
-  <div class="page">
+<a class="skip" href="#main">Skip to content</a>
 
-    <header class="cv-header">
-      <div class="header-text">
-        <h1 class="name">Adam Bekkar</h1>
-        <p class="byline">Computer Science &middot; ETHZ</p>
-        <p class="tagline">Computer science student interested in research and problem&#8209;solving.</p>
-        <p class="contact-line">
-          <a href="mailto:abekkar@student.ethz.ch">abekkar@student.ethz.ch</a>
-          <span class="sep">&middot;</span>
-          <a href="https://www.linkedin.com/in/adam-bekkar/" target="_blank" rel="noopener noreferrer">linkedin.com/in/adam&#8209;bekkar</a>
-          <span class="sep">&middot;</span>
-          <a href="https://github.com/Zeleph25/" target="_blank" rel="noopener noreferrer">github.com/Zeleph25</a>
-        </p>
-      </div>
-      <div class="photo-frame">
-        <img src="assets/img/portrait-450.jpg" width="450" height="600" alt="Adam Bekkar" />
-        <span class="corner tl"></span>
-        <span class="corner tr"></span>
-        <span class="corner bl"></span>
-        <span class="corner br"></span>
-      </div>
-    </header>
+<div class="wrap">
 
-    <section class="cv-section" id="education">
-      <h2>Education</h2>
+  <header class="hero">
+    <div>
+      <h1 class="name"><span>Adam</span> <span>Bekkar</span></h1>
+      <p class="role">Computer Science, ETH Zürich</p>
+      <p class="lede">Computer science student interested in research and problem&#8209;solving.</p>
+      <ul class="contact">
+        <li><a href="mailto:abekkar@student.ethz.ch">abekkar@student.ethz.ch</a></li>
+        <li><a href="https://www.linkedin.com/in/adam-bekkar/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+        <li><a href="https://github.com/Zeleph25/" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </div>
+    <figure class="portrait">
+      <picture>
+        <source type="image/webp" srcset="assets/img/portrait-450.webp 450w, assets/img/portrait.webp 900w" sizes="(max-width: 40rem) 100vw, 22rem">
+        <img src="assets/img/portrait.jpg" srcset="assets/img/portrait-450.jpg 450w, assets/img/portrait.jpg 900w" sizes="(max-width: 40rem) 100vw, 22rem" width="900" height="1200" alt="Adam Bekkar standing in a field, hills behind him">
+      </picture>
+    </figure>
+  </header>
 
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">ETH Zürich</h4>
-          <span class="entry-meta">2026 &ndash; Present</span>
-        </div>
-        <p class="entry-desc">Master of Science in Computer Science. Intended major in Machine Intelligence.</p>
-      </article>
+  <main id="main">
 
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">École Polytechnique Fédérale de Lausanne (EPFL)</h4>
-          <span class="entry-meta">2023 &ndash; 2026</span>
-        </div>
-        <p class="entry-desc">Bachelor of Science in Computer Science. Average: 5.1/6.</p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">Lycée Lyautey, Casablanca, Morocco</h4>
-          <span class="entry-meta">2020 &ndash; 2023</span>
-        </div>
-        <p class="entry-desc">French Baccalaureate with Highest Honours in Mathematics and Physics.</p>
-      </article>
+    <section class="section" id="education" aria-labelledby="education-h">
+      <h2 id="education-h">Education</h2>
+      <ol class="hops">
+        <li class="hop">
+          <p class="hop-place">Casablanca, Morocco</p>
+          <h3>Lycée Lyautey</h3>
+          <p class="hop-what">French Baccalaureate with Highest Honours in Mathematics and Physics.</p>
+          <span class="when">2020 &ndash; 2023</span>
+        </li>
+        <li class="hop">
+          <p class="hop-place">Lausanne</p>
+          <h3>EPFL</h3>
+          <p class="hop-what">Bachelor of Science in Computer Science. Average: 5.1/6.</p>
+          <span class="when">2023 &ndash; 2026</span>
+        </li>
+        <li class="hop hop-now">
+          <p class="hop-place">Zürich</p>
+          <h3>ETH Zürich</h3>
+          <p class="hop-what">Master of Science in Computer Science. Intended major in Machine Intelligence.</p>
+          <span class="when">2026 &ndash; Present</span>
+        </li>
+      </ol>
     </section>
 
-    <section class="cv-section" id="experience">
-      <h2>Experience</h2>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">Student Assistant at EPFL &mdash; Practice of OOP (CS&#8209;108)</h4>
-          <span class="entry-meta">Feb 2025 &ndash; Jun 2025</span>
-        </div>
-        <p class="entry-desc">Supported students in learning Java, object-oriented programming, and core data structures, and assisted with the ReCHor project.</p>
-      </article>
-    </section>
-
-    <section class="cv-section" id="projects">
-      <h2>Projects</h2>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">CXL Allocator &mdash; Research Internship at RS3 Lab, EPFL</h4>
-        </div>
-        <p class="entry-desc">Benchmarked NUMA allocators and explored allocation strategies to reduce latency overhead across the CXL interconnect.</p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">vNet &mdash; Polympiads</h4>
-        </div>
-        <p class="entry-desc">Built a distributed virtual network infrastructure for the HC2 and Prologin informatics contests.</p>
-        <p class="entry-links">More on <a href="https://github.com/polympiads/vNet" target="_blank" rel="noopener noreferrer">vNet repository</a></p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">S4S&#8209;Connect</h4>
-        </div>
-        <p class="entry-desc">Developed the web app used by ~1,000 incoming EPFL students each year during the association's welcome week, providing their agenda, course materials, and activity registration.</p>
-        <p class="entry-links">More on <a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">Students 4 Students website</a></p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">OnePass &mdash; Android Ticketing App</h4>
-        </div>
-        <p class="entry-desc">Final project for CS&#8209;311 (The Software Enterprise), an Android app simplifying event ticketing in Lausanne with live event maps, digital ticket resale, and QR code validation. Voted 4th best app of the course among 200+ students.</p>
-        <p class="entry-links">More on <a href="https://github.com/onepass-ch/onepass" target="_blank" rel="noopener noreferrer">OnePass repository</a></p>
-      </article>
-    </section>
-
-    <!-- <section class="cv-section" id="experience">
-      <h2>Experience</h2>
-
-      <article class="entry">
-        <p class="entry-desc placeholder">To be completed.</p>
-      </article>
-
-      <article class="entry">
-        <p class="entry-desc placeholder">To be completed.</p>
-      </article>
-    </section> -->
-
-    <section class="cv-section" id="representation">
-      <h2>Academic Representation</h2>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">Student Delegate &mdash; Computer Science Section</h4>
-          <span class="entry-meta">Sep 2025 &ndash; Sep 2026</span>
-        </div>
-        <p class="entry-desc">Representing students in discussions with teachers, gathering feedback and proposing improvements.</p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">Student Body Member, School Council &mdash; IC Faculty</h4>
-          <span class="entry-meta">Sep 2025 &ndash; Sep 2026</span>
-        </div>
-        <p class="entry-desc">Representing students in the IC Faculty Council, ensuring student concerns are heard during faculty discussions.</p>
-      </article>
-    </section>
-
-    <section class="cv-section" id="associations">
-      <h2>Student Associations</h2>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">Copresident, Students 4 Students</h4>
-          <span class="entry-meta">Oct 2025 &ndash; Sep 2026</span>
-        </div>
-        <p class="entry-desc">Leading the organizing team of twenty and coordinating more than a hundred staff for the week preparing new students for EPFL studies.</p>
-        <p class="entry-links">More on  <a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">students4students.ch</a></p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">IT Manager, Students 4 Students</h4>
-          <span class="entry-meta">Oct 2024 &ndash; Oct 2025</span>
-        </div>
-        <p class="entry-desc">Managing IT for three events totaling 1,000+ participants. Built S4S&#8209;Connect, a web app for students' agenda, course materials, and activity registration.</p>
-        <p class="entry-links">More on  <a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">students4students.ch</a></p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">IT Manager, Polympiads</h4>
-          <span class="entry-meta">Sep 2025 &ndash; Sep 2026</span>
-        </div>
-        <p class="entry-desc">Building and maintaining a virtual network on a distributed system infrastructure used for both HC2 and Prologin, annual Informatics Olympiad events each hosting 300+ participants at EPFL.</p>
-      </article>
-
-      <article class="entry">
-        <div class="entry-head">
-          <h4 class="entry-title">Member, IT Team of AGEPoly</h4>
-          <span class="entry-meta">Sep 2025 &ndash; Sep 2026</span>
-        </div>
-        <p class="entry-desc">Contributed to Trust, a comprehensive rewrite of truffe2.agepoly.ch, a platform that allows campus associations to borrow equipment, manage room bookings, and handle team accreditations.</p>
-        <p class="entry-links">More on  <a href="https://gitlab.com/agepoly/it/dev/trust" target="_blank" rel="noopener noreferrer">Trust repository</a></p>
-      </article>
-
-    </section>
-
-    <section class="cv-section" id="languages-skills">
-      <h2>Languages &amp; Skills</h2>
-
-      <div class="entry-block">
-        <h3 class="block-label">Programming Languages</h3>
-        <ul class="chip-list">
-          <li>Java</li>
-          <li>Scala</li>
-          <li>C</li>
-          <li>C++</li>
-          <li>Rust</li>
-          <li>Python</li>
-          <li>Kotlin</li>
-          <li>SQL</li>
-          <li>Verilog</li>
-          <li>LaTeX</li>
-          <li>RISC&#8209;V</li>
-        </ul>
-      </div>
-
-      <div class="entry-block">
-        <h3 class="block-label">Databases &amp; Tools</h3>
-        <ul class="chip-list">
-          <li>PostgreSQL</li>
-          <li>MySQL</li>
-          <li>Git</li>
-          <li>Docker</li>
-          <li>Grafana</li>
-          <li>SonarQube</li>
-        </ul>
-      </div>
-
-      <div class="entry-block">
-        <h3 class="block-label">Spoken Languages</h3>
-        <ul class="lang-list">
-          <li>
-            <span class="lang-name">French</span>
-            <span class="lang-level">Native</span>
-          </li>
-          <li>
-            <span class="lang-name">Arabic</span>
-            <span class="lang-level">Native</span>
-          </li>
-          <li>
-            <span class="lang-name">English</span>
-            <span class="lang-level">C1</span>
-          </li>
-          <li>
-            <span class="lang-name">German</span>
-            <span class="lang-level">Beginner &mdash; currently learning</span>
-          </li>
-        </ul>
+    <section class="section" id="experience" aria-labelledby="experience-h">
+      <h2 id="experience-h">Experience</h2>
+      <div class="body">
+        <article class="entry">
+          <h3>Student Assistant at EPFL, Practice of OOP (CS&#8209;108)</h3>
+          <span class="when">Feb 2025 &ndash; Jun 2025</span>
+          <p>Supported students in learning Java, object-oriented programming, and core data structures, and assisted with the ReCHor project.</p>
+        </article>
       </div>
     </section>
 
-    <footer class="colophon">
-      <p>Adam Bekkar - updated 2026</p>
-    </footer>
+    <section class="section" id="projects" aria-labelledby="projects-h">
+      <h2 id="projects-h">Projects</h2>
+      <div class="body">
+        <article class="entry">
+          <h3>CXL Allocator, Research Internship at RS3 Lab, EPFL</h3>
+          <p>Benchmarked NUMA allocators and explored allocation strategies to reduce latency overhead across the CXL interconnect.</p>
+        </article>
 
-  </div>
+        <article class="entry">
+          <h3>vNet, Polympiads</h3>
+          <p>Built a distributed virtual network infrastructure for the HC2 and Prologin informatics contests.</p>
+          <ul class="links">
+            <li><a href="https://github.com/polympiads/vNet" target="_blank" rel="noopener noreferrer">vNet repository</a></li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>S4S&#8209;Connect</h3>
+          <p>Developed the web app used by ~1,000 incoming EPFL students each year during the association's welcome week, providing their agenda, course materials, and activity registration.</p>
+          <ul class="links">
+            <li><a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">Students 4 Students website</a></li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>OnePass, Android Ticketing App</h3>
+          <p>Final project for CS&#8209;311 (The Software Enterprise), an Android app simplifying event ticketing in Lausanne with live event maps, digital ticket resale, and QR code validation. Voted 4th best app of the course among 200+ students.</p>
+          <ul class="links">
+            <li><a href="https://github.com/onepass-ch/onepass" target="_blank" rel="noopener noreferrer">OnePass repository</a></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="representation" aria-labelledby="representation-h">
+      <h2 id="representation-h">Academic Representation</h2>
+      <div class="body">
+        <article class="entry">
+          <h3>Student Delegate, Computer Science Section</h3>
+          <span class="when">Sep 2025 &ndash; Sep 2026</span>
+          <p>Representing students in discussions with teachers, gathering feedback and proposing improvements.</p>
+        </article>
+
+        <article class="entry">
+          <h3>Student Body Member, School Council, IC Faculty</h3>
+          <span class="when">Sep 2025 &ndash; Sep 2026</span>
+          <p>Representing students in the IC Faculty Council, ensuring student concerns are heard during faculty discussions.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="associations" aria-labelledby="associations-h">
+      <h2 id="associations-h">Student Associations</h2>
+      <div class="body">
+        <article class="entry">
+          <h3>Copresident, Students 4 Students</h3>
+          <span class="when">Oct 2025 &ndash; Sep 2026</span>
+          <p>Leading the organizing team of twenty and coordinating more than a hundred staff for the week preparing new students for EPFL studies.</p>
+          <ul class="links">
+            <li><a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">students4students.ch</a></li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>IT Manager, Students 4 Students</h3>
+          <span class="when">Oct 2024 &ndash; Oct 2025</span>
+          <p>Managing IT for three events totaling 1,000+ participants. Built S4S&#8209;Connect, a web app for students' agenda, course materials, and activity registration.</p>
+          <ul class="links">
+            <li><a href="https://students4students.ch" target="_blank" rel="noopener noreferrer">students4students.ch</a></li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <h3>IT Manager, Polympiads</h3>
+          <span class="when">Sep 2025 &ndash; Sep 2026</span>
+          <p>Building and maintaining a virtual network on a distributed system infrastructure used for both HC2 and Prologin, annual Informatics Olympiad events each hosting 300+ participants at EPFL.</p>
+        </article>
+
+        <article class="entry">
+          <h3>Member, IT Team of AGEPoly</h3>
+          <span class="when">Sep 2025 &ndash; Sep 2026</span>
+          <p>Contributed to Trust, a comprehensive rewrite of truffe2.agepoly.ch, a platform that allows campus associations to borrow equipment, manage room bookings, and handle team accreditations.</p>
+          <ul class="links">
+            <li><a href="https://gitlab.com/agepoly/it/dev/trust" target="_blank" rel="noopener noreferrer">Trust repository</a></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="languages-skills" aria-labelledby="skills-h">
+      <h2 id="skills-h">Languages &amp; Skills</h2>
+      <dl class="facts">
+        <dt>Programming languages</dt>
+        <dd>Java, Scala, C, C++, Rust, Python, Kotlin, SQL, Verilog, LaTeX, RISC&#8209;V</dd>
+        <dt>Databases and tools</dt>
+        <dd>PostgreSQL, MySQL, Git, Docker, Grafana, SonarQube</dd>
+        <dt>Spoken languages</dt>
+        <dd>French (native), Arabic (native), English (C1), German (beginner, currently learning)</dd>
+      </dl>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <p id="updated">Adam Bekkar, updated 2026</p>
+  </footer>
+
+</div>
 
 <script>
-(async function updateLastPushDate() {
-  const footer = document.querySelector('.colophon p');
-  const cacheKey = 'lastPushDate';
-  const cacheTTL = 1000 * 60 * 60; // 1 hour
+// Shows the date of the last push to this site's repository.
+(async function () {
+  const line = document.getElementById('updated');
+  const key = 'lastPushDate';
+  const maxAge = 1000 * 60 * 60;
 
-  function render(dateStr) {
-    const date = new Date(dateStr);
-    const formatted = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    footer.textContent = `Adam Bekkar - last updated ${formatted}`;
+  function show(iso) {
+    const day = new Date(iso).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+    line.textContent = 'Adam Bekkar, last updated ' + day;
   }
 
-  const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-  if (cached && (Date.now() - cached.fetchedAt) < cacheTTL) {
-    render(cached.date);
-    return;
-  }
+  let cached = null;
+  try { cached = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { cached = null; }
+  if (cached && Date.now() - cached.fetchedAt < maxAge) { show(cached.date); return; }
 
   try {
     const res = await fetch('https://api.github.com/repos/Zeleph25/adam.bekkar.ch/commits/main');
-    if (!res.ok) throw new Error('GitHub API error');
-    const data = await res.json();
-    const date = data.commit.committer.date;
-    localStorage.setItem(cacheKey, JSON.stringify({ date, fetchedAt: Date.now() }));
-    render(date);
-  } catch (e) {
-
-    console.warn('Could not fetch last push date:', e);
-  }
+    if (!res.ok) return;
+    const date = (await res.json()).commit.committer.date;
+    show(date);
+    try { localStorage.setItem(key, JSON.stringify({ date: date, fetchedAt: Date.now() })); } catch (e) { /* private mode */ }
+  } catch (e) { /* offline: the static line stays */ }
 })();
 </script>
 
