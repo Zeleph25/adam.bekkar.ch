@@ -221,6 +221,22 @@ html { scroll-padding-top: 1.5rem; }
     font-family: var(--sans);
 }
 
+.prose figure img { width: 100%; }
+
+/* Several plots in one figure sit side by side, and stack on a phone. */
+.fig-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.fig-grid-3 { --cols: 3; }
+.fig-grid figcaption { grid-column: 1 / -1; }
+
+@media (max-width: 40rem) {
+    .fig-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 .prose figcaption {
     margin-top: 0.7rem;
     color: var(--muted);
