@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vNet: a centrally enforced overlay network for on-site programming contests</title>
+<meta name="description" content="vNet is an overlay network that gives every machine of an on-site programming contest exactly the connectivity the rules allow, enforced on machines the organizers control. Design, implementation, tests and measurements.">
+<meta name="author" content="Adam Bekkar">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1b2063">
+<link rel="canonical" href="https://adam.bekkar.ch/papers/vnet/">
+<meta name="citation_title" content="vNet: a centrally enforced overlay network for on-site programming contests">
+<meta name="citation_author" content="Bekkar, Adam">
+<meta name="citation_publication_date" content="2026/11/10">
+<meta name="citation_pdf_url" content="https://adam.bekkar.ch/papers/vnet/bekkar-vnet-2026.pdf">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vNet: a centrally enforced overlay network for on-site programming contests">
+<meta property="og:description" content="vNet is an overlay network that gives every machine of an on-site programming contest exactly the connectivity the rules allow, enforced on machines the organizers control. Design, implementation, tests and measurements.">
+<meta property="og:url" content="https://adam.bekkar.ch/papers/vnet/">
+<meta property="og:image" content="https://adam.bekkar.ch/assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="article:author" content="Adam Bekkar">
+<meta property="article:published_time" content="2026-11-10">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../assets/img/favicon.png" sizes="48x48" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/img/apple-touch-icon.png">
+<link rel="preload" href="../../assets/fonts/schibsted-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/stix-two-text-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/site.css">
+<link rel="stylesheet" href="../../assets/css/paper.css">
+</head>
+<body>
+
+<a class="skip" href="#paper">Skip to the paper</a>
+
+<div class="wrap">
+
+  <nav class="bar" aria-label="Site">
+    <a class="home" href="../../">Adam Bekkar</a>
+    <a href="../../#papers">Papers</a>
+    <a href="../../#projects">Projects</a>
+  </nav>
+
+  <header class="paper-head">
+    <h1>vNet: a centrally enforced overlay network for on-site programming contests</h1>
+    <p class="author">Adam Bekkar</p>
+    <p class="affil">Former Head of IT at Polympiads (EPFL); MSc student in Computer Science at ETH Zurich.</p>
+    <p class="date"><time datetime="2026-11-10">10 November 2026</time></p>
+    <p class="affil print-only">adam.bekkar.ch/papers/vnet</p>
+    <ul class="links">
+      <li><a href="bekkar-vnet-2026.pdf">PDF</a></li>
+      <li><a href="https://github.com/polympiads/vNet">Source code</a></li>
+      <li><a href="https://github.com/polympiads/vNet-benchmarks">Benchmarks</a></li>
+    </ul>
+  </header>
+
+  <div class="paper-layout">
+
+    <nav class="toc" aria-labelledby="toc-h">
+      <h2 id="toc-h">Contents</h2>
+      <ol>
+        <li><a href="#s1">1. Introduction</a></li>
+        <li><a href="#s2">2. Requirements and threat model</a></li>
+        <li><a href="#s3">3. Architecture</a></li>
+        <li><a href="#s4">4. Control plane</a></li>
+        <li><a href="#s5">5. Data plane</a></li>
+        <li><a href="#s6">6. Containing the contestant machine</a></li>
+        <li><a href="#s7">7. Operating an event</a></li>
+        <li><a href="#s8">8. Implementation and testing</a></li>
+        <li><a href="#s9">9. Evaluation</a></li>
+        <li><a href="#s10">10. Limitations and future work</a></li>
+        <li><a href="#s11">11. Related work</a></li>
+        <li><a href="#s12">12. Conclusion</a></li>
+        <li><a href="#availability">Availability</a></li>
+        <li><a href="#acknowledgments">Acknowledgments</a></li>
+        <li><a href="#references">References</a></li>
+      </ol>
+    </nav>
+
+    <main class="prose" id="paper">
+<div class="abstract">
+<h2 id="abstract">Abstract</h2>
+<p>An on-site programming contest needs a network in which each contestant machine reaches a few organizer services and nothing else, on infrastructure the organizers do not control. vNet is an overlay network built for that case. A conductor admits machines and distributes routes and rules. Switches run by the organizers check every packet against a central access list, reject forged source addresses and cap each machine's rate. An agent on each machine only carries packets.</p>
+<p>Every link is mutually authenticated TLS with a role in each certificate. A machine joins through a three-party handshake in which it never names itself to its switch, and a rule change is one edit and one reload on one machine. A host firewall with a configurable bypass contains the machine's physical side.</p>
+<p>The implementation is about 6,600 lines of C++17, tested by 135 unit tests and 15 scenarios that run the real programs in network namespaces, including a client that plays the adversary. On a 2-core virtual machine hosting every process, vNet forwards about 650 Mbit/s across two switches with TLS, attaches 400 machines in about 4.2 s and applies a config change for 300 machines in 15 ms. The source and the benchmarks are public at <a href="https://github.com/polympiads/vNet">github.com/polympiads/vNet</a> and <a href="https://github.com/polympiads/vNet-benchmarks">github.com/polympiads/vNet-benchmarks</a>, and a deployment test on the EPFL VDI infrastructure is planned for December 2026.</p>
+</div>
+<h2 id="s1">1. Introduction</h2>
+<p>vNet is an overlay network that gives every machine of an on-site programming contest exactly the connectivity the rules allow, and nothing else. Which machine may talk to which is decided on machines the organizers control, never on a contestant's.</p>
+<p><strong>The event.</strong> Polympiads is the student association that runs mathematics and informatics olympiads at EPFL. The format that motivated vNet is an on-site final: finalists sit in university rooms for one long session, each at a workstation the organizers prepared, and write programs that organizer-run servers build, run and rank. In the format closest to ours, each program is a player for a game designed for that edition, and a game server runs matches between the finalists' players throughout the event.</p>
+<p><strong>The network this needs.</strong> Each contestant machine must reach a handful of organizer services, such as the game server, a judge and a documentation mirror. It must not reach another contestant's machine, and it must not reach the open internet beyond a short list of addresses. Hosts and runners need wider access, and the rules change while the event runs: a machine is replaced, a service is added, an address is opened for one download.</p>
+<p><strong>Why this is hard for a student association.</strong> The association does not own the network it runs on. Contestant desktops can be physical machines in one room and virtual desktops from a university VDI pool in another, on subnets and VLANs that only the campus IT service can configure. Isolation therefore cannot rest on switch ports or on a campus firewall. It has to travel with the machines, and it has to be run by a small team of volunteers.</p>
+<p><strong>Contributions.</strong></p>
+<ul>
+<li>A design in which no decision that matters is taken on a contestant machine. Switches run by the organizers check every packet against a central access list, reject forged source addresses and cap each machine's rate; the program on the contestant machine only carries packets.</li>
+<li>A control plane a small team can operate under pressure. One roster file generates every key, certificate and config; a rule change is one edit and one reload on one machine; every process recovers from the restart of any other without operator action.</li>
+<li>Containment of the contestant machine's physical side, with the site-specific exceptions (a VDI broker, a DNS server) expressed as configuration instead of code.</li>
+<li>An implementation in C++17 with a test suite that runs the real binaries in Linux network namespaces, including a raw client that speaks the protocol the way an attacker would.</li>
+</ul>
+<p><strong>Context.</strong> I built vNet during my one-year term as Head of IT at Polympiads, as an open-source project under the association's organization. I completed it in autumn 2026, a few months after that term ended, as I began an MSc in Computer Science at ETH Zurich.</p>
+<h2 id="s2">2. Requirements and threat model</h2>
+<p>The design follows from seven requirements and from one adversary, the contestant.</p>
+<p><strong>Requirements.</strong></p>
+<ol type="1">
+<li><em>Default deny.</em> A machine reaches only the destinations a rule names.</li>
+<li><em>Rules name machines.</em> A rule says "contestants may reach the game server", whatever room, subnet or VDI pool those machines sit in.</li>
+<li><em>Enforcement out of reach.</em> No rule is enforced only by software on the machine it restricts.</li>
+<li><em>Live changes.</em> Adding a machine or a rule during the event restarts nothing and disconnects nobody.</li>
+<li><em>Failure of any part.</em> Any process can crash and restart; contestants who are connected keep working.</li>
+<li><em>Operable by volunteers.</em> One input file, a handful of commands, and a way to see who is missing.</li>
+<li><em>Fair sharing.</em> One machine cannot take the capacity the others need.</li>
+</ol>
+<p><strong>The adversary.</strong> A contestant has an unprivileged account on their own machine. They can run any program, send any packet into the overlay, and open a TCP connection to anything they can reach on the physical network, including the ports of vNet's own servers. They want to reach another contestant's machine, the open internet or a service the rules do not give them, to pass for another machine, or to disrupt the event.</p>
+<p><strong>What is trusted.</strong> The organizers' machines (conductor and switches) and the certificate authority key, which is kept off every machine of the overlay. The physical network is trusted to carry packets, not to keep them private: every vNet link is mutually authenticated TLS 1.2 or later.</p>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table>
+<thead>
+<tr class="header">
+<th>What the contestant tries</th>
+<th>What stops it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Send a packet with another machine's source address</td>
+<td>The switch compares the source with the address bound to that connection</td>
+</tr>
+<tr class="even">
+<td>Reach a machine no rule allows</td>
+<td>The access list on the sending switch, checked again on the receiving switch</td>
+</tr>
+<tr class="odd">
+<td>Join as another machine</td>
+<td>A per-machine key, and a switch that learns the machine's name from the conductor, never from the machine</td>
+</tr>
+<tr class="even">
+<td>Pose as a switch or as the conductor</td>
+<td>The role written in each certificate, checked on every link; two switches also need a token the conductor issued for that pair</td>
+</tr>
+<tr class="odd">
+<td>Inject a route, a token or a config into a switch</td>
+<td>Accepted only on the link the switch itself opened to the conductor</td>
+</tr>
+<tr class="even">
+<td>Exhaust a server with a flood, giant frames or idle sockets</td>
+<td>Per-machine rate limits, a 65,994-byte frame bound, a 10 s limit to identify, bounded buffers</td>
+</tr>
+<tr class="odd">
+<td>Go around the overlay through the LAN or IPv6</td>
+<td>A host firewall on the contestant machine (<a href="#s6">section 6</a>), which holds only while the contestant is not root</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The last row is the weak one and <a href="#s6">section 6</a> says so plainly. A contestant who becomes root on their own machine gains nothing inside the overlay, since they hold only their own identity. They do regain the physical network, so a site that can isolate desktops in its infrastructure should do that as well.</p>
+<p><strong>Out of scope.</strong> Channels that do not use the network (a phone), denial of service against the physical network itself, and compromise of the organizers' machines.</p>
+<h2 id="s3">3. Architecture</h2>
+<p>vNet is three programs: a conductor that decides, switches that enforce and forward, and one agent per machine that only carries packets.</p>
+<figure id="fig1">
+<div class="fig-scroll" tabindex="0" role="group" aria-label="Figure 1">
+<svg class="fig" viewBox="0 0 760 460" role="img" aria-labelledby="fig1-title fig1-desc" font-size="13">
+  <title id="fig1-title">Organizer machines decide and check; agents only carry packets</title>
+  <desc id="fig1-desc">A conductor above two switches, and four machines below them. Dashed control links join the conductor to each switch and to all agents. Solid data links join each machine to a switch and the two switches to each other.</desc>
+  <text class="f-ink" x="24" y="34" font-size="15" font-weight="700">Organizer machines decide and check; agents only carry packets</text>
+  <text class="f-quiet" x="24" y="54" font-size="11.5">Solid lines carry packets, dashed lines carry control messages. Every link is mutually authenticated TLS.</text>
+  <rect class="f-band" x="48" y="66" width="700" height="238"/>
+  <text class="f-quiet" x="60" y="84" font-size="11.5">Organizer machines</text>
+  <rect class="f-band" x="48" y="336" width="700" height="100"/>
+  <text class="f-quiet" x="60" y="426" font-size="11.5">Machines in the overlay: contestants, servers, hosts</text>
+  <g class="f-ctl">
+    <path d="M294 164V220"/>
+    <path d="M502 164V220"/>
+    <path d="M60 376H36V120H228"/>
+  </g>
+  <g class="f-data">
+    <path d="M360 256H436"/>
+    <path d="M138.5 348V292"/>
+    <path d="M311.5 348V292"/>
+    <path d="M484.5 348V292"/>
+    <path d="M657.5 348V292"/>
+  </g>
+  <rect class="f-box" x="228" y="76" width="340" height="88"/>
+  <text class="f-ink" x="398" y="100" text-anchor="middle" font-weight="700">Conductor</text>
+  <text class="f-quiet" x="398" y="116" text-anchor="middle" font-size="11.5">admits machines and places them on a switch</text>
+  <text class="f-quiet" x="398" y="132" text-anchor="middle" font-size="11.5">issues join tokens and switch-pair tokens</text>
+  <text class="f-quiet" x="398" y="148" text-anchor="middle" font-size="11.5">publishes routes and sends the config</text>
+  <rect class="f-box f-main" x="60" y="220" width="300" height="72"/>
+  <text class="f-ink" x="210" y="244" text-anchor="middle" font-weight="700">Switch 1</text>
+  <text class="f-ink" x="210" y="260" text-anchor="middle" font-size="11.5">checks source, access list and rate</text>
+  <text class="f-ink" x="210" y="276" text-anchor="middle" font-size="11.5">forwards to machines, peers, internet</text>
+  <rect class="f-box f-main" x="436" y="220" width="300" height="72"/>
+  <text class="f-ink" x="586" y="244" text-anchor="middle" font-weight="700">Switch 2</text>
+  <text class="f-ink" x="586" y="260" text-anchor="middle" font-size="11.5">checks source, access list and rate</text>
+  <text class="f-ink" x="586" y="276" text-anchor="middle" font-size="11.5">forwards to machines, peers, internet</text>
+  <rect class="f-box" x="60" y="348" width="157" height="56"/>
+  <text class="f-ink" x="138.5" y="372" text-anchor="middle" font-weight="700">Contestant c001</text>
+  <text class="f-quiet" x="138.5" y="388" text-anchor="middle" font-size="11.5">agent, TUN 10.0.1.1</text>
+  <rect class="f-box" x="233" y="348" width="157" height="56"/>
+  <text class="f-ink" x="311.5" y="372" text-anchor="middle" font-weight="700">Contestant c002</text>
+  <text class="f-quiet" x="311.5" y="388" text-anchor="middle" font-size="11.5">agent, TUN 10.0.1.2</text>
+  <rect class="f-box" x="406" y="348" width="157" height="56"/>
+  <text class="f-ink" x="484.5" y="372" text-anchor="middle" font-weight="700">Contestant c003</text>
+  <text class="f-quiet" x="484.5" y="388" text-anchor="middle" font-size="11.5">agent, TUN 10.0.1.3</text>
+  <rect class="f-box" x="579" y="348" width="157" height="56"/>
+  <text class="f-ink" x="657.5" y="372" text-anchor="middle" font-weight="700">Game server</text>
+  <text class="f-quiet" x="657.5" y="388" text-anchor="middle" font-size="11.5">agent, TUN 10.0.0.1</text>
+  <text class="f-quiet" x="302" y="196" font-size="11.5">tokens, routes, config</text>
+  <text class="f-quiet" x="510" y="196" font-size="11.5">tokens, routes, config</text>
+  <text class="f-quiet" x="60" y="112" font-size="11.5">all agents: join, control</text>
+  <text class="f-quiet" x="398" y="246" text-anchor="middle" font-size="11.5">packets</text>
+  <text class="f-quiet" x="147" y="324" font-size="11.5">IPv4 packets in TLS</text>
+</svg>
+</div>
+<figcaption><em>Figure 1.</em> Packets travel from agent to switch to switch to agent. The conductor sets that path up and is not on it.</figcaption>
+</figure>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table class="wide">
+<thead>
+<tr class="header">
+<th>Role</th>
+<th>Runs on</th>
+<th>Holds</th>
+<th>Trusted with</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Conductor</td>
+<td>One organizer machine</td>
+<td>The list of machines and keys, the switch config, the map of who is where</td>
+<td>Admitting machines, placing them on switches, issuing tokens, distributing routes and the config. It never forwards a packet.</td>
+</tr>
+<tr class="even">
+<td>Switch</td>
+<td>One or more organizer machines</td>
+<td>The access list, the routes, one connection per local machine</td>
+<td>Every per-packet decision: source check, access list, rate limit, forwarding to a local machine, a peer switch or the internet.</td>
+</tr>
+<tr class="odd">
+<td>Agent</td>
+<td>Every machine in the overlay</td>
+<td>Its own key and certificate, nothing about other machines</td>
+<td>Nothing. It reads packets from a TUN interface and hands them to its switch, and back.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>A separate control plane.</strong> The conductor is not on the data path. Once two machines have joined, their packets travel agent to switch to switch to agent, and keep doing so while the conductor is down. What stops without it is joining.</p>
+<p><strong>Several switches.</strong> A switch is a single-threaded process, so capacity is added by adding switches. The conductor places each joining machine on a switch its network can reach, round-robin, and moves the machine to another switch when its own dies.</p>
+<p><strong>Addresses.</strong> Each machine gets one virtual IPv4 address, fixed by the config, inside an overlay prefix (10.0.0.0/8 unless set otherwise). The agent puts that address on a TUN interface as a /32. Applications use it like any other interface and need no change.</p>
+<p><strong>One transport.</strong> Every link is a TCP connection wrapped in TLS, with a certificate on both ends. A single transport keeps the implementation small, with one event loop, one framing and one TLS library; <a href="#s10">section 10</a> discusses what it costs.</p>
+<h2 id="s4">4. Control plane</h2>
+<p>The control plane answers four questions: who a connection is, where a machine should attach, how switches learn about each other, and what happens when something dies.</p>
+<h3 id="s4-1">4.1 Identity</h3>
+<p>A machine proves who it is with two independent things. The first is a random key, listed with its name and role in the conductor's auth file and compared in constant time. The second is a certificate signed by the event's certificate authority, whose subject carries the role: <code>conductor</code>, <code>switch</code> or <code>agent</code>. Each side of every link checks the role of the other, so the files on a contestant machine cannot be used to run a switch or a conductor. Host names are not checked, because contest machines have no stable names; the role is what matters.</p>
+<h3 id="s4-2">4.2 Joining</h3>
+<p>A machine joins in a three-party handshake in which it never tells the switch its own name.</p>
+<figure id="fig2">
+<div class="fig-scroll" tabindex="0" role="group" aria-label="Figure 2">
+<svg class="fig" viewBox="0 0 760 448" role="img" aria-labelledby="fig2-title fig2-desc" font-size="13">
+  <title id="fig2-title">The switch learns a machine name from the conductor, never from the machine</title>
+  <desc id="fig2-desc">Sequence of seven messages between an agent, a switch, the conductor and the other switches: 1, agent to conductor, name and key; 2, conductor to agent, switch address and token; 3, conductor to switch, name and one-time token; 4, agent to switch, token only, no name; 5, switch to agent, accepted and address; 6, switch to conductor, machine attached here; 7, conductor to other switches, route to that address.</desc>
+  <defs>
+    <marker id="fig2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="f-tip" d="M0 0L10 5L0 10z"/></marker>
+    <marker id="fig2-arrow-main" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="f-tip-main" d="M0 0L10 5L0 10z"/></marker>
+  </defs>
+  <text class="f-ink" x="24" y="34" font-size="15" font-weight="700">The switch learns a machine name from the conductor, never from the machine</text>
+  <text class="f-quiet" x="24" y="54" font-size="11.5">A join in seven messages, read top to bottom. Every message travels inside TLS.</text>
+  <line class="f-life" x1="100" x2="100" y1="120" y2="424"/>
+  <line class="f-life" x1="290" x2="290" y1="120" y2="424"/>
+  <line class="f-life" x1="480" x2="480" y1="120" y2="424"/>
+  <line class="f-life" x1="670" x2="670" y1="120" y2="424"/>
+  <rect class="f-box" x="25" y="64" width="150" height="56"/>
+  <text class="f-ink" x="100" y="88" text-anchor="middle" font-weight="700">Agent</text>
+  <text class="f-quiet" x="100" y="104" text-anchor="middle" font-size="11.5">contestant machine</text>
+  <rect class="f-box" x="215" y="64" width="150" height="56"/>
+  <text class="f-ink" x="290" y="88" text-anchor="middle" font-weight="700">Switch</text>
+  <text class="f-quiet" x="290" y="104" text-anchor="middle" font-size="11.5">organizer machine</text>
+  <rect class="f-box" x="405" y="64" width="150" height="56"/>
+  <text class="f-ink" x="480" y="88" text-anchor="middle" font-weight="700">Conductor</text>
+  <text class="f-quiet" x="480" y="104" text-anchor="middle" font-size="11.5">organizer machine</text>
+  <rect class="f-box" x="595" y="64" width="150" height="56"/>
+  <text class="f-ink" x="670" y="88" text-anchor="middle" font-weight="700">Other switches</text>
+  <text class="f-quiet" x="670" y="104" text-anchor="middle" font-size="11.5">organizer machines</text>
+  <path class="f-msg" d="M100 160H480" marker-end="url(#fig2-arrow)"/>
+  <path class="f-msg" d="M480 200H100" marker-end="url(#fig2-arrow)"/>
+  <path class="f-msg f-msg-main" d="M480 240H290" marker-end="url(#fig2-arrow-main)"/>
+  <path class="f-msg" d="M100 280H290" marker-end="url(#fig2-arrow)"/>
+  <path class="f-msg" d="M290 320H100" marker-end="url(#fig2-arrow)"/>
+  <path class="f-msg" d="M290 360H480" marker-end="url(#fig2-arrow)"/>
+  <path class="f-msg" d="M480 400H670" marker-end="url(#fig2-arrow)"/>
+  <text class="f-ink f-lbl" x="110" y="152" font-size="12">1. name and key</text>
+  <text class="f-ink f-lbl" x="110" y="192" font-size="12">2. switch address + token</text>
+  <text class="f-ink f-lbl" x="300" y="232" font-size="12" font-weight="700">3. name + one-time token</text>
+  <text class="f-ink f-lbl" x="110" y="272" font-size="12">4. token only, no name</text>
+  <text class="f-ink f-lbl" x="110" y="312" font-size="12">5. accepted + address</text>
+  <text class="f-ink f-lbl" x="300" y="352" font-size="12">6. machine attached here</text>
+  <text class="f-ink f-lbl" x="490" y="392" font-size="12">7. route to that address</text>
+</svg>
+</div>
+<figcaption><em>Figure 2.</em> The conductor hands the same token to the machine and to the switch (messages 2 and 3). The machine shows it to the switch (4), which answers with the machine's virtual address (5).</figcaption>
+</figure>
+<p>The token is 64 bits from a cryptographic random generator, valid once and for 60 seconds. The switch receives it from the conductor together with the machine's name, so the name a switch binds to a connection is the one the conductor authenticated. The virtual address comes from the config for that name. A machine cannot ask for an address, and it cannot present a token issued to another machine without having stolen it from a TLS link.</p>
+<p>If a machine joins while an older connection under the same name still exists (a frozen VM, a link that died silently), the newer connection wins on both the conductor and the switch.</p>
+<h3 id="s4-3">4.3 Routes and switch-to-switch links</h3>
+<p>When a switch accepts a machine it tells the conductor, which publishes the route (virtual address, switch name, switch address) to every other switch. Switches open links to each other on demand, when a route first points to a peer. The conductor issues a fresh token for every pair of switches; whichever side dials presents it, so a process with a stolen switch certificate still cannot attach to the mesh without the conductor's consent. A packet that arrives before its route is held for up to 5 seconds, at most 16 packets per destination, then dropped.</p>
+<h3 id="s4-4">4.4 Distributing the config</h3>
+<p>The switch config, which assigns addresses and lists the allowed pairs, lives in one file on the conductor. The conductor sends it to each switch as it registers and to all of them after a reload signal. A file larger than one frame travels in pieces of at most 60,000 bytes; the switch parses the whole only when the last piece has arrived, and applies it without touching connected machines. Each switch answers with a SHA-256 fingerprint of the parsed content in a canonical order, so the conductor's log shows which switch runs which rules, independent of comments or line order. A switch that has not received a config yet accepts no machine.</p>
+<h3 id="s4-5">4.5 Liveness and recovery</h3>
+<p>Every link carries heartbeats (10 s by default) and is declared dead after 30 s of silence. No recovery path needs an operator.</p>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table class="wide">
+<thead>
+<tr class="header">
+<th>Failure</th>
+<th>Traffic meanwhile</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The conductor restarts</td>
+<td>Joined machines keep talking; nothing new can join</td>
+<td>Switches redial every 2 s and announce the machines they hold; agents reattach their control connection</td>
+</tr>
+<tr class="even">
+<td>A switch dies</td>
+<td>Its machines are cut off</td>
+<td>Their agents ask the conductor for another switch and keep their TUN interface and address; routes are withdrawn, then published again</td>
+</tr>
+<tr class="odd">
+<td>The conductor link of a switch is cut</td>
+<td>It keeps serving its own machines; after 30 s of silence the conductor withdraws its routes from the other switches</td>
+<td>It redials every 2 s and announces its machines again, which republishes the routes</td>
+</tr>
+<tr class="even">
+<td>An agent is killed</td>
+<td>That machine only</td>
+<td>Its service restarts it; the new agent restores the physical default route the dead one left diverted</td>
+</tr>
+<tr class="odd">
+<td>One identity appears twice</td>
+<td>The older connection is closed</td>
+<td>None needed</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="s5">5. Data plane</h2>
+<p>A packet from one contestant machine to a server crosses four user-space processes (agent, switch, switch, agent) and is checked on both switches.</p>
+<h3 id="s5-1">5.1 Framing</h3>
+<p>Every message on every link starts with a 6-byte header: a 32-bit payload length and a 16-bit type, big endian. Control messages are Protocol Buffers. Data is the raw IPv4 datagram as it was read from the TUN interface, with no wrapper, so forwarding a packet costs no serialization. The protocol has 17 message types whose numbers are fixed for the life of the protocol; a removed type's number is not reused. A header that announces more than 65,994 bytes closes the connection.</p>
+<h3 id="s5-2">5.2 The packet engine</h3>
+<p>The switch's decisions are isolated in one component, the black box. It holds the config, the table of local machines and the routes, and it maps a packet and where it came from to one of five actions: deliver locally, forward to a peer switch, forward to the internet, hold for a route, or drop with a reason. It touches no socket, which makes every rule testable without a network.</p>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table>
+<thead>
+<tr class="header">
+<th>Packet arrives from</th>
+<th>Checks, in order</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A local machine</td>
+<td>The source address is the one bound to this connection. The machine is within its packet and byte rate. The pair (source, destination) is in the access list, or the destination is an internet address this machine is allowed.</td>
+</tr>
+<tr class="even">
+<td>A peer switch</td>
+<td>The destination is a local machine. The source is a known machine, and its route, once learned, points to that very peer. The pair is in the access list, checked again.</td>
+</tr>
+<tr class="odd">
+<td>The internet interface</td>
+<td>The destination is a local machine that is allowed to reach the packet's source.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A switch repeats the checks on packets from a peer because every switch holds the same config. A switch that is wrong or compromised still cannot reach a machine the rules protect, nor speak for a machine it does not hold. Drops are counted per reason and per machine instead of being logged, so a port scan from one contestant cannot fill a disk or slow the loop.</p>
+<p><strong>Rate limits.</strong> Each machine has two token buckets on its switch, packets per second and bytes per second (20,000 packets and 200 Mbit per second by default, with one second of burst). They are applied after the source check and before the access list.</p>
+<h3 id="s5-3">5.3 The event loop</h3>
+<p>Each process is one thread around <code>epoll</code>, in edge-triggered one-shot mode, with a small state machine per connection (header, payload, connecting, TLS handshake, TUN). Three properties matter for an event with hundreds of machines.</p>
+<ul>
+<li><em>Nothing blocks.</em> Outgoing connects and TLS handshakes in both directions run inside the loop as readiness events, so a peer that goes silent mid-handshake stalls nobody. A connection that has not identified itself within 10 seconds is closed.</li>
+<li><em>Memory is bounded.</em> Each connection has a write buffer of at most 2 MB. A data packet for a peer whose buffer is full is dropped, as a congested link would drop it. A control message that does not fit closes the connection, since the peer is not reading.</li>
+<li><em>Turns are fair.</em> A connection is served at most 64 frames per turn of the loop; what is left waits on a backlog list. Without this cap one flooding machine starved every other connection of its switch (<a href="#s8-3">section 8.3</a>).</li>
+</ul>
+<h3 id="s5-4">5.4 Internet access</h3>
+<p>A rule can allow a machine one internet address or one prefix. The switch forwards such packets through its own TUN interface and masquerades them out of its physical interface; return traffic is accepted only from an address that machine was allowed to reach. Since the agent replaces the machine's default route with the overlay, an address without a rule is unreachable, including the machine's DNS resolver.</p>
+<h2 id="s6">6. Containing the contestant machine</h2>
+<p>The overlay governs only what enters the TUN interface, so the agent also has to control what leaves the machine by its real network card.</p>
+<h3 id="s6-1">6.1 Routes</h3>
+<p>When it joins, the agent points the machine's default route at the TUN interface, so every destination without a more specific route is judged by the switch. It first pins the addresses of the conductor and of its switch through the gateway the machine had before, as host routes; otherwise its own TLS connections would be routed into the tunnel they carry. The physical gateway is also written to a state file, so that an agent started after a crash can put the default route back.</p>
+<h3 id="s6-2">6.2 Lockdown</h3>
+<p>Routing alone leaves two holes: machines on the same subnet reach each other directly, and a dual-stack network leaves IPv6 open. With lockdown on, the agent installs two firewall chains, hooked first in the kernel's input and output paths, that accept loopback, the TUN interface, its own two control connections, replies to accepted connections and DHCP, and drop everything else. IPv6 is dropped entirely, since the overlay carries IPv4. The chains follow the agent to a new switch and are removed when it stops.</p>
+<h3 id="s6-3">6.3 The bypass file</h3>
+<p>Some traffic has to stay on the physical network. The case that prompted this is virtual desktops: the VDI product runs its own agent inside each desktop, which must keep a connection to the product's broker and accept display sessions <a href="#ref-9">[9]</a>. Hard-coding one vendor's servers and ports into vNet would have been the wrong place for them.</p>
+<p>The agent instead reads a bypass file with two kinds of lines.</p>
+<pre tabindex="0"><code># the broker&#39;s servers, both ways
+route 192.0.2.10/32
+route 192.0.2.11/32
+# display sessions from the client subnet, inbound only
+in  -p tcp -s 198.51.100.0/24 --dport 22443 -j ACCEPT</code></pre>
+<p>A <code>route</code> line keeps a prefix on the physical gateway and, under lockdown, allows it in both directions. An <code>in</code> or <code>out</code> line is a firewall rule appended before the final drop, exactly as written (in6 and out6 lines do the same for IPv6). The arguments are passed to the firewall tool as an argument vector, with no shell, so a line cannot run a command. A file that does not parse stops the agent before it joins, a rule the firewall refuses is logged while the drop stays in place, and a prefix that would take the overlay or the default route off the TUN interface is refused. A reload signal applies an edited file to a running agent.</p>
+<p>Writing this feature exposed a bug in the option it replaced. The earlier allow-list opened the firewall for a network but installed no route, so an allowed server outside the local subnet was still sent into the tunnel and dropped by the switch. It had passed its test because the test's allowed host sat on the local subnet.</p>
+<h3 id="s6-4">6.4 What this layer is worth</h3>
+<p>Lockdown is enforced by root on the contestant's own machine. It holds as long as the contestant cannot become root, and not beyond. A site that can isolate desktops in its infrastructure (a private VLAN, port isolation, distributed firewall rules) should rely on that and treat lockdown as a second layer. To make the first locked-down machine on a new network easy to get right, the agent can log each packet it drops, rate limited, to the kernel log; the log then lists what the bypass file is still missing.</p>
+<h2 id="s7">7. Operating an event</h2>
+<p>Everything an event needs is generated from one roster file, and every change during the event is an edit to that file followed by one reload.</p>
+<pre tabindex="0"><code>switch switch1
+switch switch2
+agent  judge 10.0.0.1 judges internet=0.0.0.0/0
+agent  c001  10.0.1.1 contestants lockdown
+agent  c002  10.0.1.2 contestants lockdown
+allow  contestants judges
+bypass contestants route 192.0.2.10/32</code></pre>
+<p>The roster names switches, machines with their virtual address and groups, which groups may talk, and what each group keeps on the physical network. A generator turns it into the conductor's auth file and switch config, one environment file per machine for its service unit, one bypass file per machine that needs one, and, on request, a certificate authority with one certificate per machine. Keys are random and survive a rerun, so regenerating after an edit does not invalidate machines that are already deployed.</p>
+<p><strong>Changing rules live.</strong> To add a machine or a rule, the operator edits the roster, reruns the generator, copies two files to the conductor and reloads it. The conductor re-reads its auth file and sends the new config to every switch. A file that does not parse leaves the previous one in force everywhere and says so in the log.</p>
+<p><strong>Seeing the state.</strong> The conductor writes its view (switches, machines, where each one is attached, joins in progress) to a file every minute and on demand. A small tool prints it and, given the auth file, lists the machines that are expected but not connected, which is what an operator needs to know during setup. Each switch prints its counters on a signal: packets delivered, forwarded and dropped by reason, and the same per machine.</p>
+<p><strong>Running as services.</strong> The three programs ship with service units that restart them on failure; those of the conductor and the switch raise the file descriptor limit, since each connected machine costs its switch one socket. Secrets are read from the environment or from a file, not from the command line, where any local user could read them from the process list.</p>
+<h2 id="s8">8. Implementation and testing</h2>
+<p>vNet is about 6,600 lines of C++17 on Linux, with OpenSSL and Protocol Buffers as its only dependencies, and it is tested by running the real programs against each other.</p>
+<h3 id="s8-1">8.1 Code</h3>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table>
+<thead>
+<tr class="header">
+<th>Part</th>
+<th>Non-blank lines</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Conductor</td>
+<td>1,002</td>
+</tr>
+<tr class="even">
+<td>Switch</td>
+<td>1,113</td>
+</tr>
+<tr class="odd">
+<td>Agent</td>
+<td>916</td>
+</tr>
+<tr class="even">
+<td>Shared: event loop, packet engine, TLS, framing, utilities, headers</td>
+<td>3,606</td>
+</tr>
+<tr class="odd">
+<td>Unit tests</td>
+<td>2,260</td>
+</tr>
+<tr class="even">
+<td>Integration harness and raw protocol client (shell, Python)</td>
+<td>655</td>
+</tr>
+<tr class="odd">
+<td>Roster generator and certificate tool (Python, shell)</td>
+<td>313</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The programs call the system's <code>ip</code> and <code>iptables</code> tools to change routes and firewall rules, always with an argument vector and never through a shell.</p>
+<h3 id="s8-2">8.2 Tests</h3>
+<p>Three layers run on every push in continuous integration.</p>
+<ul>
+<li><strong>135 unit tests</strong> cover the event loop, the packet engine, the config parser, the rate limiter and the bypass file parser. They run once with coverage and once under Valgrind with file descriptor tracking, which fails the build on a leaked descriptor as well as on a memory error.</li>
+<li><strong>15 integration scenarios</strong> start a real conductor, two switches and up to three agents in Linux network namespaces, with TLS and a certificate per role, and check behavior from the outside with <code>ping</code>, <code>iperf3</code> and the routing and firewall tables. They cover the access list, restarts and kills of each process, a cut link, a duplicated identity, route restoration, lockdown, the bypass file, config distribution and reload, the rate limit under a flood, and throughput.</li>
+<li><strong>A raw protocol client</strong> speaks the wire format by hand and plays the adversary of <a href="#s2">section 2</a>. It forges a join token, a switch hello, a route withdrawal and a config from the port contestants can reach, announces a 1 GB frame, identifies twice on one connection, uses a wrong key and an unknown name, and holds a silent socket open. Each attempt must end with the connection closed and both servers alive.</li>
+</ul>
+<h3 id="s8-3">8.3 Bugs the tests found</h3>
+<p>The integration layer paid for itself: three of the six bugs below need several processes to appear, and two more need a second environment.</p>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table class="wide">
+<thead>
+<tr class="header">
+<th>Bug</th>
+<th>Found by</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>One dead TLS link took healthy links down with it. OpenSSL keeps errors in a per-thread queue, and the error left by one connection was read as the next one's.</td>
+<td>Conductor restart scenario</td>
+<td>Clear the queue around every TLS call; treat an unexpected end of stream as a hangup</td>
+</tr>
+<tr class="even">
+<td>One flooding machine starved every other connection of its switch: 0 of 15 pings got through on a 4-core CI runner.</td>
+<td>Flood scenario, in CI only</td>
+<td>At most 64 frames per connection per turn, with a backlog list</td>
+</tr>
+<tr class="odd">
+<td>An agent that lost its switch could not reach the next one, because the new switch's address was routed into the dead tunnel.</td>
+<td>Restart scenarios</td>
+<td>Pin control addresses, and open the firewall for them, before connecting</td>
+</tr>
+<tr class="even">
+<td>A new TLS link between two event-loop peers stalled, each side waiting for the other to become readable.</td>
+<td>Connection tests with both ends in one loop</td>
+<td>Register a connecting socket for writability from the start</td>
+</tr>
+<tr class="odd">
+<td>The rate limiter stopped refilling under frequent calls, because integer arithmetic discarded refills smaller than one token.</td>
+<td>Rate limit tests</td>
+<td>Count in billionths of a token</td>
+</tr>
+<tr class="even">
+<td>A child process leaked two descriptors when the program it was meant to run did not exist.</td>
+<td>Valgrind descriptor tracking, in CI only</td>
+<td>Close them before the child exits</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two of the six appeared only on the CI runner, whose core count and Valgrind version differ from the development machine. Running the same checks in more than one environment found bugs that repetition in one environment had not.</p>
+<h2 id="s9">9. Evaluation</h2>
+<p>On a 2-core virtual machine that hosts every process of the test, vNet forwards about 650 Mbit/s through two switches with TLS, attaches 400 machines in about 4.2 s, and keeps a flooded machine reachable. A deployment test on the EPFL VDI infrastructure is planned for December 2026, and <a href="#s9-5">section 9.5</a> says what it will add to these numbers.</p>
+<h3 id="s9-1">9.1 Setup</h3>
+<p>All measurements were taken on one virtual machine: 2 cores of an Intel Xeon at 2.1 GHz, 8 GB of memory, Linux 6.18, GCC 13.3 in release mode, OpenSSL 3.0.13, iperf3 3.16. The conductor, two switches, the agents and the load generators share those two cores. Each runs in its own network namespace, joined through a router namespace by virtual Ethernet pairs, with no loss or delay added. The numbers are therefore a floor for separate machines and say nothing about a lossy network. The scripts and their raw output are public <a href="#ref-10">[10]</a>. Every range below is over three passes of the same script, and nine for the baseline, which is measured before each throughput run.</p>
+<h3 id="s9-2">9.2 Throughput and latency</h3>
+<p>One TCP stream for 10 s (3 s for the baseline) from one agent to another, each on a different switch, and 200 pings at 10 ms intervals on the same path.</p>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table class="wide">
+<thead>
+<tr class="header">
+<th>Path</th>
+<th>Throughput (Mbit/s)</th>
+<th>Ping round trip, mean (ms)</th>
+<th>Runs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>No overlay, through the router namespace</td>
+<td>15,800 to 17,700</td>
+<td>0.02</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td>vNet, links without TLS, rate limits off</td>
+<td>1,030 to 1,080</td>
+<td>0.28 to 0.32</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>vNet, TLS, rate limits off</td>
+<td>640 to 666</td>
+<td>0.42 to 0.50</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>vNet, TLS, default limit of 200 Mbit/s per machine</td>
+<td>212</td>
+<td>0.39 to 0.46</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>TLS costs about 40% of the throughput: each packet is encrypted and decrypted three times, once per link. With TLS the overlay adds 0.4 to 0.5 ms to a round trip, for eight passes through a user-space process. With the default settings the per-machine limit is what a single machine meets first, as intended. The 650 Mbit/s is the total this machine can forward, so it is the aggregate that an operator sizes switches for.</p>
+<h3 id="s9-3">9.3 Joining in a burst</h3>
+<p>All agents are started as fast as one shell loop can start them, against a conductor and two switches that are already up, with the default timers. The time runs from the first start to the moment the conductor has registered the last machine, and includes starting the agent processes on the same two cores. Three runs per size.</p>
+<div class="table-wrap" tabindex="0" role="group" aria-label="Table">
+<table class="wide">
+<thead>
+<tr class="header">
+<th>Machines</th>
+<th>Time until all are registered (s)</th>
+<th>Split between the two switches</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100</td>
+<td>1.02 to 1.09</td>
+<td>50 and 50</td>
+</tr>
+<tr class="even">
+<td>200</td>
+<td>2.03 to 2.11</td>
+<td>100 and 100</td>
+</tr>
+<tr class="odd">
+<td>400</td>
+<td>4.00 to 4.31</td>
+<td>200 and 200</td>
+</tr>
+<tr class="even">
+<td>800</td>
+<td>8.32 to 8.63</td>
+<td>400 and 400</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The time grows linearly, at 93 to 100 machines per second. Each join costs two mutually authenticated TLS handshakes with 2048-bit RSA certificates, and both ends of each handshake run on the measured machine. No join was refused, every machine registered exactly once, and the two switches received the same number of machines in every run.</p>
+<h3 id="s9-4">9.4 A flood, and a config change</h3>
+<p><strong>Flood.</strong> One machine sends 300 Mbit/s of UDP for 5 s to a machine on the same switch, with per-machine limits set to 5,000 packets and 50 Mbit per second. Meanwhile a machine on the other switch pings the victim 15 times. In three runs all 15 pings were answered every time, and the switch counted between 107,653 and 107,658 packets dropped by the rate limit. The byte limit predicts about 107,670 for that load, so every run is within 20 packets of the prediction. Before the per-turn cap of <a href="#s5-3">section 5.3</a> the same test lost every ping on a 4-core machine.</p>
+<p><strong>Config change.</strong> For 300 machines with four rules each (1,504 lines, 23 KB), the time from the reload signal on the conductor to both switches having confirmed the new fingerprint was 15 ms in each of three runs. For 5,000 machines (25,004 lines, 391 KB, sent in seven pieces) it was 62 to 74 ms.</p>
+<h3 id="s9-5">9.5 Planned measurements</h3>
+<ul>
+<li><strong>On the EPFL VDI infrastructure, December 2026.</strong> The first deployment test will run vNet on the virtual desktops of the EPFL VDI. It is the place to measure what one test machine cannot show: throughput and join times across a real network, and the bypass file against the VDI product itself. In this paper the bypass file was exercised against a stand-in server in another subnet, with the routes and ports a broker needs.</li>
+<li><strong>More switches, on separate hosts.</strong> Every run in this section used two switches on one machine.</li>
+<li><strong>Under packet loss.</strong> The test network of this section drops nothing. <a href="#s10">Section 10</a> explains why loss is the condition this design handles worst.</li>
+</ul>
+<h2 id="s10">10. Limitations and future work</h2>
+<p>The design makes four trades that a reader should know before adopting it.</p>
+<p><strong>TCP inside TCP.</strong> Contestants' TCP connections ride inside vNet's own TCP links. When the physical path loses packets, both layers retransmit and their timers interfere, a known failure mode of stacked TCP <a href="#ref-6">[6]</a>. On a wired campus network the outer links should see little loss, which remains to be measured; across the internet they would see more. A datagram transport for the data links would remove it and is the first change I would make for an event with remote sites.</p>
+<p><strong>One thread per switch, one conductor.</strong> A switch forwards on a single core, so capacity grows by adding switches, not cores. The conductor is a single process with no replica. Its failure does not interrupt traffic (<a href="#s4-5">section 4.5</a>), but nothing can join until it is back, and it must come back at the same address.</p>
+<p><strong>Lockdown trusts the machine.</strong> <a href="#s6-4">Section 6.4</a> covers this. Related to it, a bypass route is open to every process on the machine, not only to the one that needs it. Restricting it to one user account is possible with the firewall's owner match and needs one more line kind in the bypass file, to keep a route without opening the firewall for it.</p>
+<p><strong>Coarse rules.</strong> The access list allows or denies pairs of machines and, for the internet, addresses and prefixes. It has no notion of ports or protocols, and the overlay carries IPv4 only. That is enough for the contest of <a href="#s1">section 1</a>, where a server is either reachable or not, and it keeps the config readable by someone who is not a network engineer.</p>
+<p>Two further items are planned work, not trade-offs: the December 2026 test on the EPFL VDI infrastructure, and measurements on a network with loss.</p>
+<h2 id="s11">11. Related work</h2>
+<p>vNet is closest to a classic client-server VPN extended to several servers under one control plane, and furthest from the mesh VPNs that are popular today.</p>
+<p><strong>Mesh overlays.</strong> Tailscale separates a coordination service, which distributes keys and policy, from a data plane on every device, which carries traffic directly between devices where it can and applies the packet filter there <a href="#ref-2">[2]</a>. Nebula identifies each host by a certificate that carries its groups and enforces its firewall on each host <a href="#ref-3">[3]</a>. ZeroTier's rules engine runs in the agent on every device, with rules signed by a controller and enforced by both sender and receiver <a href="#ref-4">[4]</a>. These designs aim for direct paths between hosts, and they place enforcement at the endpoints. A contest wants neither. Two contestants are exactly the pair that must not have a direct path, and they are also both endpoints of the conversation the rules forbid. vNet puts the check on a third machine that neither of them controls. The difference shows when endpoints are compromised: a filter on the endpoint falls with it, a check on the switch does not. That is no help if the two machines can also reach each other outside the overlay, which is why <a href="#s6">section 6</a> exists.</p>
+<p><strong>WireGuard.</strong> WireGuard is a layer-3 tunnel in the kernel, over UDP, built on the principle that a peer's public key is bound to the tunnel addresses it may use <a href="#ref-1">[1]</a>. vNet's source check is the same binding, between a connection and an address. WireGuard leaves key distribution and policy to the deployer by design. A hub-and-spoke WireGuard network with firewall rules on the hub is the nearest off-the-shelf equivalent of one vNet switch, and its data plane would be faster and free of the stacked-TCP problem. What vNet adds around that core is what the hub would otherwise need scripts for: identities and rules generated from a roster, placement over several hubs with failover, and rule changes pushed live. I have not benchmarked the two against each other.</p>
+<p><strong>OpenVPN.</strong> OpenVPN is the nearest ancestor: a user-space daemon on a TUN interface, TLS with certificates, a central server. Unless told otherwise, its server hands all client traffic to its own TUN interface, where the host's firewall can filter it, so clients see only the server <a href="#ref-5">[5]</a>. Its manual also states that it is designed to work best over UDP and offers TCP for networks where UDP cannot be used <a href="#ref-5">[5]</a>, and vNet so far offers only the TCP side of that choice. vNet differs in having several servers that share routes and one config, rules that name machines, and roles checked on every link.</p>
+<p><strong>The primitives.</strong> The TUN interface that hands packets to a user-space program is a standard Linux facility <a href="#ref-7">[7]</a>. The split between a control plane that decides and a data plane that forwards is the organizing idea of software-defined networking; vNet applies it at the scale of one room.</p>
+<h2 id="s12">12. Conclusion</h2>
+<p>vNet turns the network of an on-site contest into something the organizers bring with them. The rules live in one file, they are enforced on machines the organizers own, and they survive the failure of any single process. The data plane is deliberately plain (user space, TCP, one thread per switch), and the measurements suggest it is enough for a room of contest machines and not built for raw throughput.</p>
+<p>The part I would repeat on any networked system is the testing. Running the real programs against each other in network namespaces, with a client that plays the adversary, found the bugs that mattered, and two of them only showed on a second machine. The next milestone is the test on the EPFL VDI infrastructure in December 2026.</p>
+<h2 id="availability">Availability</h2>
+<p>vNet is open source under the MIT license, copyright Polympiads, at <a href="https://github.com/polympiads/vNet">github.com/polympiads/vNet</a> <a href="#ref-8">[8]</a>. The repository holds the three programs, the roster and certificate tools, service units, a Docker setup for a local trial, and the whole test suite. On any Linux machine with root, <code>sudo tests/integration/run.sh build</code> reruns the scenarios of <a href="#s8">section 8</a>. The scripts behind <a href="#s9">section 9</a> and their raw results are in a second repository, <a href="https://github.com/polympiads/vNet-benchmarks">github.com/polympiads/vNet-benchmarks</a> <a href="#ref-10">[10]</a>, where <code>sudo ./run-matrix.sh</code> with the vNet source and build directories reruns every measurement.</p>
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>My thanks go to Théo Hollender, who as president of Polympiads gave me this project to implement, and with it a real use case where it will have a real impact. vNet was built for the association's events, which gave it its requirements.</p>
+<p>I used Claude, an AI assistant by Anthropic, throughout this project: to learn the networking concepts involved, to debug, and to write code, tests and parts of this text under my direction and review.</p>
+<h2 id="references">References</h2>
+<ol class="refs">
+<li id="ref-1">J. A. Donenfeld. <a href="https://www.ndss-symposium.org/ndss2017/ndss-2017-programme/wireguard-next-generation-kernel-network-tunnel/">WireGuard: Next Generation Kernel Network Tunnel</a>. Network and Distributed System Security Symposium (NDSS), 2017.</li>
+<li id="ref-2">Tailscale. <a href="https://tailscale.com/docs/concepts/control-data-planes">Control and data planes</a>. Product documentation.</li>
+<li id="ref-3">Defined Networking. <a href="https://nebula.defined.net/">Nebula: open source overlay networking</a>. Project documentation.</li>
+<li id="ref-4">ZeroTier. <a href="https://docs.zerotier.com/rules/">Rules Engine</a>. Product documentation.</li>
+<li id="ref-5">OpenVPN. <a href="https://manpages.ubuntu.com/manpages/focal/man8/openvpn.8.html">openvpn(8), secure IP tunnel daemon</a>. Manual page.</li>
+<li id="ref-6">O. Titz. <a href="https://wiretapped.mirrorservice.org/network-security/cipe/docs/tcp-tcp.html">Why TCP Over TCP Is A Bad Idea</a>. 2001, read from a mirror.</li>
+<li id="ref-7">Linux kernel documentation. <a href="https://docs.kernel.org/networking/tuntap.html">Universal TUN/TAP device driver</a>.</li>
+<li id="ref-8">Polympiads. <a href="https://github.com/polympiads/vNet">vNet source repository</a>. github.com/polympiads/vNet.</li>
+<li id="ref-9">Omnissa. <a href="https://docs.omnissa.com/Horizon-Security/TCPandUDPPortsforClientsandAgents">TCP and UDP Ports for Clients and Agents</a>. Horizon security documentation.</li>
+<li id="ref-10">Polympiads. <a href="https://github.com/polympiads/vNet-benchmarks">vNet benchmarks: scripts and results</a>. github.com/polympiads/vNet-benchmarks.</li>
+</ol>
+
+    </main>
+
+  </div>
+
+  <footer class="foot">
+    <p>Adam Bekkar, 10 November 2026. <a href="../../">Back to the home page</a></p>
+  </footer>
+
+</div>
+
+</body>
+</html>
