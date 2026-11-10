@@ -42,8 +42,7 @@
 
 \begin{document}
 
-\noindent
-\begin{minipage}[c]{0.72\textwidth}
+\newcommand{\headtext}{%
  \raggedright
  {\LARGE\bfseries Adam Bekkar}\\[0.45em]
  {\small
@@ -55,13 +54,20 @@
  \ | \
  \faLinkedin\ \href{https://www.linkedin.com/in/adam-bekkar}{adam-bekkar}
  }\\[0.7em]
- Research interests: machine learning, probabilistic models, optimization, and computer systems.
+ Research interests: machine learning, probabilistic models, optimization, and computer systems.}
+
+\noindent
+\IfFileExists{img/adam_bekkar.jpg}{%
+\begin{minipage}[c]{3cm}
+ \includegraphics[width=3cm]{img/adam_bekkar.jpg}
 \end{minipage}%
-%\hfill
-%\begin{minipage}[c]{3.7cm}
-% \raggedleft
-% \includegraphics[height=4.4cm]{img/adam_bekkar.jpg}
-%\end{minipage}
+\hspace{0.6cm}%
+\begin{minipage}[c]{\dimexpr\textwidth-3.6cm\relax}
+ \headtext
+\end{minipage}}{%
+\begin{minipage}[c]{0.72\textwidth}
+ \headtext
+\end{minipage}}
 
 \vspace{0.6em}
 
