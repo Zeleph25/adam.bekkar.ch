@@ -7,7 +7,7 @@
 <meta name="description" content="Adam Bekkar, MSc student in Computer Science at ETH Zürich. Research, projects and CV.">
 <meta name="author" content="Adam Bekkar">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#1b2063">
+<meta name="theme-color" content="#ffffff">
 <link rel="canonical" href="https://adam.bekkar.ch/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Adam Bekkar">
@@ -23,7 +23,9 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/stix-two-text-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
 </head>
 <body>
 
@@ -39,6 +41,7 @@
       <li><a href="#leadership">Leadership</a></li>
       <li><a href="adam-bekkar-cv.pdf">CV</a></li>
     </ul>
+    <button class="toggle" type="button" aria-label="Dark mode" aria-pressed="false" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M10 2a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
   </nav>
 
   <header class="intro">
@@ -193,32 +196,6 @@
   </footer>
 
 </div>
-
-<script>
-// Shows the date of the last push to this site's repository.
-(async function () {
-  const line = document.getElementById('updated');
-  const key = 'lastPushDate';
-  const maxAge = 1000 * 60 * 60;
-
-  function show(iso) {
-    const day = new Date(iso).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
-    line.textContent = 'Adam Bekkar, last updated ' + day;
-  }
-
-  let cached = null;
-  try { cached = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { cached = null; }
-  if (cached && Date.now() - cached.fetchedAt < maxAge) { show(cached.date); return; }
-
-  try {
-    const res = await fetch('https://api.github.com/repos/Zeleph25/adam.bekkar.ch/commits/main');
-    if (!res.ok) return;
-    const date = (await res.json()).commit.committer.date;
-    show(date);
-    try { localStorage.setItem(key, JSON.stringify({ date: date, fetchedAt: Date.now() })); } catch (e) { /* private mode */ }
-  } catch (e) { /* offline: the static line stays */ }
-})();
-</script>
 
 </body>
 </html>
